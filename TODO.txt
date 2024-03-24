@@ -1,0 +1,10 @@
+1. Chat modes + dialog history
+    [x] Select Chat Mode (there will be +100 chat modes later on) + gpt 4 turbo
+    [x] Dialog history
+
+2. Subscriptions and token tasks
+    [] Gift tokens
+    [] Balance (subscription, subscription will be paid 3rd party by Cryptomus)
+
+3. Settings
+4. Referrals and revenue sharing
