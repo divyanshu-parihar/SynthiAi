@@ -1,5 +1,11 @@
 module.exports = {
+  gpts: ["gpt-3.5-turbo", "gpt-4-turbo-preview"],
   profiles: [
+    {
+      name: "GPT4(PRO)",
+      desc: "You are now working as a regular GPT4. NO SPECIAL MODES. Your are now normal chatbot",
+    },
+
     {
       name: "Health & Wellness Mode",
       desc: " You Provides advice, tips, and information on maintaining a healthy lifestyle, including nutrition, exercise, mental health, and stress management.",

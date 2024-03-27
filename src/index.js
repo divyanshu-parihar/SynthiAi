@@ -1,11 +1,23 @@
 const { Telegraf, Markup, session } = require("telegraf");
-const { PrismaClient } = require("@prisma/client");
 const fs = require("node:fs");
 const path = require("path");
 const OpenAI = require("openai");
+const axios = require("axios");
 const dotenv = require("dotenv");
+
 const { SQLite } = require("@telegraf/session/sqlite");
+
+const {
+  start,
+  menu,
+  selectChat,
+  history,
+  dialog,
+  exportDialogs,
+} = require("./events");
 const config = require("./config");
+const { prisma } = require("./handler/database");
+
 const store = SQLite({
   filename: "./telegraf-sessions.sqlite",
 });
@@ -15,433 +27,303 @@ dotenv.config();
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-// bot.use(async (ctx, next) => {
-//   ctx.session.count++; // increment once
-//   return next(); // pass control to next middleware
-// });
 
 const bot = new Telegraf(process.env.BOT_TOKEN, {});
 
-const prisma = new PrismaClient();
+bot.context.chats = {};
+
 bot.use(session({ store }));
+bot.on("voice", async (ctx) => {
+  console.log(ctx);
 
-bot.start(async (ctx) => {
-  // console.log(ctx.state);
-  // // bot.context.se÷ssion = {};
-  // console.log(ctx.session);
-  // ctx.state[ctx.from.id] = {};
-  // bot.telegram.editMessageText();
-  // const interaction = await prisma.interaction.findFirst({
-  //   where: {
-  //     userid: userId,
-  //   },
-  // });
-
-  // if (interaction) {
-  //   await prisma.currentAssitant.update({
-  //     data: {
-  //       chatMode: "",
-  //     },
-  //     where: {
-  //       userid: userId,
-  //     },
-  //   });
-  // } else {
-  //   await prisma.currentAssitant.create({
-  //     data: {
-  //       // id: prisma.ui,
-  //       userid: userId,
-
-  //       chatMode: "",
-  //     },
-  //   });
-  // }
-  const data = await prisma.interaction.create({
-    data: {
-      userid: ctx.from.id.toString(),
-      chatid: ctx.chat.id.toString(),
-      name: "hello",
-    },
-  });
-
-  const currentInteraction = await prisma.currentInteraction.findFirst({
+  const data = await prisma.currentAssitant.findFirst({
     where: {
       userid: ctx.from.id.toString(),
     },
   });
 
-  if (currentInteraction) {
-    await prisma.currentInteraction.update({
-      data: {
-        currentInteraction: data.id,
-      },
-      where: {
-        userid: ctx.from.id.toString(),
-      },
-    });
-  } else {
-    await prisma.currentInteraction.create({
-      data: {
-        // id: prisma.ui,
-        userid: ctx.from.id.toString(),
-
-        currentInteraction: data.id,
-      },
-    });
+  if (data.chatMode == "") {
+    await ctx.reply("Please select a chatMode");
+    return;
   }
-  const userId = ctx.from.id.toString();
-  const row = await prisma.currentAssitant.findFirst({
-    where: {
-      userid: ctx.from.id.toString(),
-    },
+  // download audio
+  console.log(ctx);
+  const audio = ctx.message.voice;
+  const audioLink = await ctx.telegram.getFileLink(audio.file_id);
+
+  // Define a path where you want to save the audio file locally
+  const filePath =
+    __dirname + `/${ctx.from.id.toString()}.${audio.mime_type.split("/")[1]}`;
+  // console.log(filePath);
+  // Download the audio file using Axios
+  const res = await axios({
+    method: "GET",
+    url: audioLink,
+    responseType: "stream",
   });
 
-  if (row) {
-    await prisma.currentAssitant.update({
-      data: {
-        chatMode: "",
-      },
+  // Create a writable stream to save the audio file
+  const writeStream = fs.createWriteStream(filePath);
+
+  // Pipe the response data stream to the write stream to save the audio file
+  res.data.pipe(writeStream);
+
+  // Listen for when the file writing is complete
+  writeStream.on("finish", async () => {
+    console.log("Audio file saved successfully:", filePath);
+
+    const transcription = await openai.audio.transcriptions.create({
+      file: fs.createReadStream(filePath),
+      model: "whisper-1",
+    });
+
+    // fs.dele;
+
+    console.log(transcription);
+    await ctx.reply("YOU: \n" + transcription.text);
+    fs.unlinkSync(filePath, (e) => console.log("could not delete"));
+    // console.log(transcription.text);
+    const settings = await prisma.userSettings.findFirst({
       where: {
-        userid: userId,
-      },
-    });
-  } else {
-    await prisma.currentAssitant.create({
-      data: {
-        // id: prisma.ui,
-        userid: userId,
-
-        chatMode: "",
-      },
-    });
-  }
-  ctx.reply(
-    'Your dialog "🧠 Hello" is saved to 🗂️ Dialog History. You can continue it anytime with /menu command'
-  );
-  ctx.reply(`Hi! I'm MindAI bot 🤖
-
-    Commands:
-    ⚪ /menu – Menu
-    ⚪ /balance – Account balance (🍉 Subscription)
-    ⚪ /mode – Select chat mode
-    ⚪ /new – Start new dialog
-    ⚪ /settings – Show settings
-    
-    🧠 GPT-4 Turbo is available now in /settings!
-    🎨 Create images with DALL-E 3/ in 👩‍🎨 Image Generation mode
-    🎤 You can send Voice Messages instead of text
-    
-    Important notes:
-    1. The longer your dialog, the more tokens are spent with each new message. To start new dialog, send /new command
-    2. Write in 🇬🇧 English for a better quality of answers
-    3. GPT-4 Turbo consumes 10x more tokens than ChatGPT. So use it when you really need it
-    
-    👩🏼‍💻 Support: @Oscar_Web3 - @itsB3nson
-    📜 Check out our Whitepaper for more information: click here`);
-});
-
-bot.hears("/menu", async (ctx) => {
-  try {
-    await prisma.currentAssitant.create({
-      data: {
         userid: ctx.from.id.toString(),
-        chatMode: "",
       },
     });
-  } catch (e) {
-    console.log(e);
-  }
-  // console.log(ctx)
-  ctx.reply(
-    `🫂 Subscribe to our channel to get latest bot updates: @MindAIProject
-
-    🏠 Menu:`,
-    {
-      reply_markup: {
-        inline_keyboard: [
-          /* Inline buttons. 2 side-by-side */
-          [{ text: "Select Chat Mode", callback_data: "SelectChat" }],
-          [{ text: "Dialog History", callback_data: "Dialog-0" }],
-          [{ text: "Get Free Tokens", callback_data: "FreeTokens" }],
-          [{ text: "Gift Tokens", callback_data: "GiftToken" }],
-          [{ text: "Balance(Subscription)", callback_data: "Balance" }],
-          [
-            { text: "Settings", callback_data: "Settings" },
-            { text: "Help", callback_data: "Help" },
-          ],
-          /* One button */
-          // [ { text: "Next", callback_data: "next" } ],
-
-          /* Also, we can have URL buttons. */
-          [{ text: "Open in browser", url: "telegraf.js.org" }],
-        ],
-      },
-    }
-  );
-});
-
-bot.action("SelectChat", async (ctx) => {
-  // console.log(bot.context);
-
-  const currentIndex = 0;
-  const historyIndex = 0;
-  // console.log(ctx.state[ctx.from.id]);
-  // console.log(ctx)
-  // console.log(ctx.update.callback_query.message)
-  // Get the current message ID and chat ID
-
-  let profiles = config.profiles.slice(currentIndex, currentIndex + 5);
-
-  let keyboard = [];
-  for (let el of profiles) {
-    console.log(el);
-    keyboard.push([{ text: el.name, callback_data: el.name }]);
-  }
-  await ctx.editMessageText("Select chat mode (73 modes available");
-  const messageId = ctx.update.callback_query.message.message_id;
-  await ctx.editMessageReplyMarkup(
-    Markup.inlineKeyboard([
-      // [{ text: "Assitant", callback_data: "Assitant" }],
-      // [{ text: "Brief Assitant", callback_data: "BriefAssitant" }],
-      // [{ text: "Code Developer", callback_data: "CodeDeveloper" }],
-      // [{ text: "DALLE-3 Image Generation", callback_data: "Dalle" }],
-      // [{ text: "Eva Elfie(18+) [PRO]", callback_data: "EvaElfie" }],
-      ...keyboard,
-
-      [{ text: "Next", callback_data: "next-" + currentIndex }],
-      [{ text: "Back to menu", callback_data: "BackMenu" }],
-    ]).reply_markup,
-    { message_id: messageId }
-  );
-  // Send a confirmation message
-});
-
-bot.action(/^history-\d+-\d+$/, async (ctx) => {
-  let index = ctx.match[0].split("-")[2];
-  let interactionid = ctx.match[0].split("-")[1];
-  console.log(index, interactionid);
-  try {
-    let data = await prisma.chat.findMany({
-      where: {
-        interactionId: parseInt(interactionid),
-      },
-    });
-
-    if (data.length == 0) {
-      await ctx.reply("No Chats in this interaction");
-    }
-    const list = data.slice(index, index + 4);
-    if (list.length == 0) {
-      await ctx.reply("No More chats");
+    if (!settings) {
+      await ctx.reply("Looks like you have not ran /start. Please run it .");
       return;
     }
-    for (const chat of list) {
-      let prompt = chat.prompt.split("prompt :")[1];
-      await ctx.reply(`
-      🧑‍💻 You: ${prompt}\n
--
-[Telegram](https://t.me/) | [Twitter](https://twitter.com/) | [Website](https://google.com)
-Built by SythiAi
-      `);
+    // const el = { name: data["chatMode"], desc: desc.desc };
+    const prompt = `I want you to act like you are GPT4.
+    prompt : ${transcription.text}`;
+    console.log(prompt);
 
-      await ctx.reply(`
-      🧑‍💻 You: ${chat.response}\n
--
-[Telegram](https://t.me/) | [Twitter](https://twitter.com/) | [Website](https://google.com)
-Built by SythiAi
-      `);
+    let message = await ctx.reply("...");
+    console.log(settings.gpt);
+    const stream = await openai.chat.completions.create({
+      model: settings.gpt,
+      messages: [{ role: "user", content: prompt }],
+      stream: true,
+    });
+    let response = "";
+
+    for await (const chunk of stream) {
+      if (
+        chunk.choices[0]?.delta?.content == null ||
+        chunk.choices[0]?.delta?.content == ""
+      )
+        continue;
+
+      const newText = chunk.choices[0]?.delta?.content || "";
+      response += newText;
+
+      if (message.text != response) {
+        try {
+          await bot.telegram.editMessageText(
+            message.chat.id,
+            message.message_id,
+            undefined,
+            response
+          );
+        } catch (e) {}
+      }
     }
-    index += 4;
-    // await ctx.reply(
-    //   Markup.inlineKeyboard([
-    //     // [{ text: "Assitant", callback_data: "Assitant" }],
-    //     // [{ text: "Brief Assitant", callback_data: "BriefAssitant" }],
-    //     // [{ text: "Code Developer", callback_data: "CodeDeveloper" }],
-    //     // [{ text: "DALLE-3 Image Generation", callback_data: "Dalle" }],
-    //     // [{ text: "Eva Elfie(18+) [PRO]", callback_data: "EvaElfie" }],
-    //     ...keyboard,
-    //     // [[{ text: "Dialog History", callback_data: "Dialog-" + historyIndex }]][
-    //     [
-    //       {
-    //         text: "Next",
-    //         callback_data: `${history}-${interactionid}-${index}`,
-    //       },
-    //     ],
-    //     [{ text: "Back to menu", callback_data: "BackMenu" }],
-    //   ]).reply_markup,
-    //   { message_id: messageId }
-    // );
-    await ctx.reply("Options: ", {
-      reply_markup: {
-        inline_keyboard: [
-          /* Inline buttons. 2 side-by-side */
-          // [{ text: "Select Chat Mode", callback_data: "SelectChat" }],
-          // [{ text: "Dialog History", callback_data: "Dialog-0" }],
-          // [{ text: "Get Free Tokens", callback_data: "FreeTokens" }],
-          // [{ text: "Gift Tokens", callback_data: "GiftToken" }],
-          // [{ text: "Balance(Subscription)", callback_data: "Balance" }],
-          // [
-          //   { text: "Settings", callback_data: "Settings" },
-          //   { text: "Help", callback_data: "Help" },
-          // ],
-          /* One button */
-          // [ { text: "Next", callback_data: "next" } ],
+  });
+});
+bot.start(async (ctx) => {
+  await ctx.reply(`Hello!
+  I am the most advanced Artificial Intelligence in the world (created by OpenAI).
+  
+  I can help you with many tasks. For example:
+  – write a social media post, an essay, an email
+  – recognize your 🎤 Voice Messages
+  – write/fix code
+  – draw a picture
+  – translate text into any language better than Google Translate
+  – solve homework
+  – correct errors in the text
+  – be your personal psychologist
+  - ... I can do anything!
+  If you need help, go to 🏠 Menu:
+    ⤷ Command: /menu`);
+  await ctx.reply(`Let's get started!`);
 
-          /* Also, we can have URL buttons. */
-          [
-            {
-              text: "Show More",
-              callback_data: `history-${interactionid}-${index}`,
-            },
-          ],
-          [
-            {
-              text: "Export dialogs",
-              callback_data: "ExportDialogs-" + interactionid,
-            },
-          ],
-        ],
+  try {
+    await prisma.userSettings.create({
+      data: {
+        userid: ctx.from.id.toString(),
+        username: ctx.from.username,
+        language: "ENGLISH",
+        gpt: "gpt-3.5-turbo",
       },
     });
-  } catch (e) {
-    console.log(e);
-    await ctx.reply("error occured");
-    return;
-  }
+  } catch (e) {}
+});
+bot.action("Help", async (ctx) => {
+  await ctx.reply(`I'm Synthi AI 🤖
+
+  Commands:
+  ⚪ /menu – Menu
+  ⚪ /balance – Account balance (Subscription)
+  ⚪ /new – Start new interation(required) 
+  ⚪ /settings – Show settings
+  
+  🧠 GPT-4 Turbo is available 
+  🎨 Image Generation mode is live
+  🎤 Voice Messages can be used
+  
+  Key Points to Remember:
+  - Your conversation's length directly influences token consumption; shorter dialogs save tokens
+  - Restart the conversation using the /new command
+  - Utilize English (🇬🇧) for enhanced response quality
+  
+  The GPT-4 Turbo mode uses ten times the tokens compared to ChatGPT.
+  👩🏼‍💻 Support: @marcus_xei - Lead Synthi Architect
+  📜 More details in our page. 
+  `);
+});
+bot.hears("/help", async (ctx) => {
+  await ctx.reply(`I'm Synthi AI 🤖
+
+  Commands:
+  ⚪ /menu – Menu
+  ⚪ /balance – Account balance (Subscription)
+  ⚪ /mode – Select chat mode
+  ⚪ /new – Start new dialog
+  ⚪ /settings – Show settings
+  
+  🧠 GPT-4 Turbo is available 
+  🎨 Image Generation mode is live
+  🎤 Voice Messages can be used
+  
+  Key Points to Remember:
+  - Your conversation's length directly influences token consumption; shorter dialogs save tokens
+  - Restart the conversation using the /new command
+  - Utilize English (🇬🇧) for enhanced response quality
+  
+  The GPT-4 Turbo mode uses ten times the tokens compared to ChatGPT.
+  👩🏼‍💻 Support: @marcus_xei - Lead Synthi Architect
+  📜 More details in our page. 
+  `);
+});
+bot.hears("/menu", menu);
+bot.hears("/new", (ctx) => {
+  start(ctx, bot);
+});
+bot.action("VoiceGPT", async (ctx) => {
+  // TODO: check for subscription
+  await prisma.currentAssitant.update({
+    data: {
+      chatMode: "VoiceGPT",
+    },
+    where: {
+      userid: ctx.from.id.toString(),
+    },
+  });
+
+  await ctx.reply("Start sending the voice prompts..");
+});
+bot.action("ImageGenerationMode", async (ctx) => {
+  // TODO: check for subscription
+  await prisma.currentAssitant.update({
+    data: {
+      chatMode: "ImageGenerationMode",
+    },
+    where: {
+      userid: ctx.from.id.toString(),
+    },
+  });
+
+  await ctx.reply("Start sending the image prompts..");
+});
+bot.action("changeUsername", async (ctx) => {
+  console.log("before", bot.context[ctx.from.id]);
+  ctx.reply("Now, please send me a message.");
+  bot.context[ctx.from.id] = true;
+  // console.log(bot.session);
+  await ctx.answerCbQuery();
 });
 
-bot.action(/Dialog-\d+/, async (ctx) => {
-  console.log("Hello");
-  let historyIndex = ctx.match[0].split("-")[1];
-  // let historyIndex = 0;
-  const messageId = ctx.update.callback_query.message.message_id;
-
-  let keyboard = [];
+bot.action("AIMODEL", async (ctx) => {
   try {
-    const data = await prisma.interaction.findMany({
+    await ctx.editMessageText(`
+    ChatGPT is that well-known model. It's fast and cheap. Ideal for everyday tasks. If there are some tasks it can't handle, try the GPT-4
+
+    💡 Note: ChatGPT consumes 25x less tokens than GPT-4. Prefer using it for daily tasks.
+    
+    🟢🟢🟢⚪️⚪️ – Smart
+    
+    🟢🟢🟢🟢🟢 – Fast
+    
+    🟢🟢🟢🟢🟢 – Cheap
+    
+    Select model:`);
+    await ctx.editMessageReplyMarkup(
+      Markup.inlineKeyboard([
+        [
+          {
+            text: "ChatGPT3 turbo",
+            callback_data: "changeGPT|chagpt-3.5-turbo",
+          },
+          { text: "GPT4", callback_data: "changeGPT|gpt-4-turbo-preview" },
+        ],
+        [{ text: "Back", callback_data: "BackMenu" }],
+      ]).reply_markup
+    );
+  } catch (e) {
+    console.log(e);
+  }
+});
+bot.action(/changeGPT|w+/, async (ctx) => {
+  console.log(ctx.match.input);
+  const response = ctx.match.input.split("|")[1];
+  console.log(response);
+  if (response == "chagpt-3.5-turbo") {
+    await prisma.userSettings.update({
+      data: {
+        gpt: response,
+      },
       where: {
         userid: ctx.from.id.toString(),
       },
     });
-
-    console.log(data);
-
-    for (const el of data.reverse().slice(historyIndex, historyIndex + 5)) {
-      keyboard.push([
-        {
-          text: `😍 ${el.name}`,
-          callback_data: "history-" + el.id + "-" + 0,
-        },
-      ]);
-    }
-  } catch (e) {
-    console.log(e);
-    await ctx.reply("could not find dialogs");
-    return;
+  } else {
+    //TODO :  check for subscription.
+    await prisma.userSettings.update({
+      data: {
+        gpt: response,
+      },
+      where: {
+        userid: ctx.from.id.toString(),
+      },
+    });
   }
 
-  historyIndex += 5;
-  await ctx.editMessageText(`Here's your 🗂️ Dialog History
-  You can select any dialog and continue it!
-  `);
-  console.log(keyboard);
-  await ctx.editMessageReplyMarkup(
-    Markup.inlineKeyboard([
-      // [{ text: "Assitant", callback_data: "Assitant" }],
-      // [{ text: "Brief Assitant", callback_data: "BriefAssitant" }],
-      // [{ text: "Code Developer", callback_data: "CodeDeveloper" }],
-      // [{ text: "DALLE-3 Image Generation", callback_data: "Dalle" }],
-      // [{ text: "Eva Elfie(18+) [PRO]", callback_data: "EvaElfie" }],
-      ...keyboard,
-      // [[{ text: "Dialog History", callback_data: "Dialog-" + historyIndex }]][
-
-      [{ text: "Delete all dialogs", callback_data: "DeleteAllDialogs" }],
-      [{ text: "Next", callback_data: "Dialog-" + historyIndex }],
-
-      [
-        // ],
-        { text: "Back to menu", callback_data: "BackMenu" },
-      ],
-    ]).reply_markup,
-    { message_id: messageId }
-  );
+  await ctx.reply("GPT changed!");
 });
-// bot.action(/history-\d+/, async (ctx) => {
-//   let data = ctx.match[0].split("-")[1];
-
-//   const chats = await prisma.chat.findMany({
-//     where: {},
-//   });
-// });
-bot.action(/ExportDialogs-\d+/, async (ctx) => {
-  console.log("file exporting");
-  let interactionid = ctx.match[0].split("-")[1];
+bot.action("settings", async (ctx) => {
   try {
-    const data = await prisma.interaction.findFirst({
-      where: {
-        id: parseInt(interactionid),
-      },
-    });
-
-    const chats = await prisma.chat.findMany({
-      where: {
-        interactionId: data.id,
-      },
-    });
-    const html = `
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Database Information</title>
-            </head>
-            <body style="text-align:center">
-                <h1>Interaction Log:</h1>
-                        ${chats
-                          .map(
-                            (row) => `
-                            <div style="border: 2px solid black; margin: 2px;">
-                                <div style="margin: 2px;background-color: yellow;">${
-                                  row.prompt.split("prompt :")[1]
-                                }</div>
-                                <div style="padding:2px;">${row.response}</div>
-                               
-                            </div>
-                        `
-                          )
-                          .join("")}
-                    
-            </body>
-            </html>
-        `;
-
-    // Write HTML to file
-    fs.writeFile(
-      path.join(__dirname, "temp", ctx.from.id.toString() + ".html"),
-      html,
-      "utf8",
-      async (err) => {
-        if (err) {
-          console.error("Error writing HTML file:", err);
-
-          return;
-        }
-        // await ctx.replyWithDocument(
-        //   path.join(__dirname, ctx.from.id.toString() + ".html")
-        // );
-        // console.log("HTML file generated successfully.");
-      }
+    await ctx.editMessageText("⚙️ Settings:");
+    await ctx.editMessageReplyMarkup(
+      Markup.inlineKeyboard([
+        [
+          {
+            text: "Username",
+            callback_data: "changeUsername",
+          },
+        ],
+        [{ text: "AI Model", callback_data: "AIMODEL" }],
+        [{ text: "Back to menu", callback_data: "BackMenu" }],
+      ]).reply_markup
     );
-    await ctx.replyWithDocument({
-      source: path.join(__dirname, ctx.from.id.toString() + ".html"),
-    });
   } catch (e) {
     console.log(e);
-    await ctx.reply("could not find dialogs");
-    return;
   }
 });
+bot.action("SelectChat", selectChat);
+bot.action(/^history-\d+-\d+$/, history);
+bot.action(/Dialog-\d+/, dialog);
+
+bot.action(/ExportDialogs-\d+/, exportDialogs);
 bot.action("DeleteAllDialogs", async (ctx) => {
   await ctx.editMessageText(
     `You sure want to delete the Dialogs(Irreversible)? `
@@ -525,51 +407,81 @@ bot.action("BackMenu", async (ctx) => {
 let profiles = config.profiles;
 for (const el of profiles) {
   bot.action(el.name, async (ctx) => {
-    await prisma.currentAssitant.update({
-      where: {
-        userid: ctx.from.id.toString(),
-      },
-      data: {
-        chatMode: el.name,
-      },
-    });
+    try {
+      await prisma.currentAssitant.update({
+        where: {
+          userid: ctx.from.id.toString(),
+        },
+        data: {
+          chatMode: el.name,
+        },
+      });
+    } catch (e) {
+      await prisma.currentAssitant.create({
+        data: {
+          userid: ctx.from.id.toString(),
+          chatMode: el.name,
+        },
+      });
+    }
+
     // console.log(ctx.session);
     await ctx.reply(`Synthi AI: 👩🏼‍🎓 Hi, I'm ${el.name}. How can I help you?
     `);
   });
 }
-// let keyboard = [];
-// for (let el of profiles) {
-//   console.log(el);
-//   keyboard.push([{ text: el.name, callback_data: el.name }]);
-// }
-
-// bot.action("Assitant", async (ctx) => {
-//   // console.log(bot.context.session);
-//   await prisma.currentAssitant.update({
-//     where: {
-//       userid: ctx.from.id.toString(),
-//     },
-//     data: {
-//       chatMode: "Assitant",
-//     },
-//   });
-//   // console.log(ctx.session);
-//   await ctx.reply(`Synthi AI: 👩🏼‍🎓 Hi, I'm Assistant. How can I help you?
-//   `);
-// });
-// bot.action("BriefAssitant", async (ctx) => {
-//   await ctx.reply(bot.context[ctx.message.from.id].assistant_type);
-// });
 
 bot.on("text", async (ctx) => {
+  if (bot.context.chatBoost)
+    if (bot.context[ctx.from.id.toString()]) {
+      await prisma.userSettings.update({
+        data: {
+          username: ctx.message.text,
+        },
+        where: {
+          userid: ctx.from.id.toString(),
+        },
+      });
+
+      await ctx.reply("You name changed! Welcome, " + ctx.message.text);
+      console.log("here");
+      bot.context[ctx.from.id.toString()] = false;
+      return;
+    }
+
+  const data = await prisma.currentAssitant.findFirst({
+    where: {
+      userid: ctx.from.id.toString(),
+    },
+  });
+  if (!data) {
+    await ctx.reply("Plese select any chatbot settings/menu");
+    return;
+  }
+  if (data.chatMode == "ImageGenerationMode") {
+    await ctx.reply("Please wait.. Image is being generated.");
+    const response = await openai.images.generate({
+      model: "dall-e-3",
+      prompt: ctx.message.text,
+      size: "1024x1024",
+      quality: "standard",
+      n: 1,
+    });
+
+    console.log(response);
+    image_url = response.data[0].url;
+    console.log(image_url);
+
+    await ctx.sendPhoto(image_url);
+    return;
+  }
   const currentInteractionData = await prisma.currentInteraction.findFirst({
     where: {
       userid: ctx.from.id.toString(),
     },
   });
   if (!currentInteractionData) {
-    return await ctx.reply("Please start a new Interaction with /start");
+    return await ctx.reply("Please start a new Interaction with /new");
   }
   const interaction = await prisma.interaction.findFirst({
     where: {
@@ -588,47 +500,59 @@ bot.on("text", async (ctx) => {
     });
   }
 
-  const data = await prisma.currentAssitant.findFirst({
+  const settings = await prisma.userSettings.findFirst({
     where: {
       userid: ctx.from.id.toString(),
     },
   });
+  if (!settings) {
+    await ctx.reply("Looks like you have not ran /start. Please run it .");
+    return;
+  }
+
   // might slow it down in long term. consider making 2 configs. one for name and other description
   const desc = config.profiles.find((el) => el.name == data.chatMode);
 
   if (data.chatMode == "") {
-    await ctx.reply("Please select a chatMode");
+    await ctx.reply("Please select a chatMode. /menu");
     return;
   }
-  // console.log("userdata", data);
+
   const el = { name: data["chatMode"], desc: desc.desc };
-  const prompt = `I want you to act like you are in  ${el.name}. here is the description for your mode and reply as per your descripton:
+
+  try {
+    bot.context.chats[ctx.from.id.toString()].push(`You : ${ctx.message.text}`);
+  } catch (e) {
+    bot.context.chats[ctx.from.id.toString()] = [];
+    bot.context.chats[ctx.from.id.toString()].push(`You : ${ctx.message.text}`);
+  }
+  const prompt = `I want you to act like you are in  ${
+    el.name
+  }. here is the description for your mode and reply as per your descripton without mentioned that your are an ai:
   description : ${el.desc},
-  word limit : 40 words,
-  prompt : ${ctx.message.text}`;
+  word limit : 20 words,
+  prompt : ${bot.context.chats[ctx.from.id.toString()].join()}`;
   console.log(prompt);
+
   let message = await ctx.reply("...");
+  console.log(settings.gpt);
   const stream = await openai.chat.completions.create({
-    model: "gpt-4",
+    model: settings.gpt,
     messages: [{ role: "user", content: prompt }],
     stream: true,
   });
   let response = "";
 
-  // stream.on("data", (data) => console.log("data", data));
   for await (const chunk of stream) {
     if (
       chunk.choices[0]?.delta?.content == null ||
       chunk.choices[0]?.delta?.content == ""
     )
       continue;
-    // await ctx.reply("..listening");
+
     const newText = chunk.choices[0]?.delta?.content || "";
     response += newText;
-    // console.log(newText);
-    // stream.pause();
 
-    Promise.all([new Promise((resolve) => setTimeout(() => resolve, 2000))]);
     if (message.text != response) {
       try {
         await bot.telegram.editMessageText(
@@ -638,47 +562,10 @@ bot.on("text", async (ctx) => {
           response
         );
       } catch (e) {}
-      // setTimeout(() => console.log("waited"), 2000);
     }
-    // if (ctx.session.lastMessageId) {
-    //   try {
-    //     // Delete the previous reply
-    //     await ctx.telegram.(
-    //       ctx.chat.id,
-    //       ctx.session.lastMessageId,
-    //       ctx.session.lastMessageId
-    //       // response
-    //     );
-    //   } catch (error) {
-    //     console.error("Error deleting previous message:", error);
-    //   }
-    // }
-    // let msg = await ctx.reply(response);
-    // ctx.session.lastMessageId = msg.message_id;
-
-    // bot.telegram.editMessageText();
-    // const { chatId, messageId } = ctx.update.callback_query.message.chat;
-    // const { chatId, messageId } = msg.chat;
-
-    // console.log("chatid", chatId, "messageid", messageId);
-    // // Call the `editMessageText` method on `bot.telegram` to edit the message
-    // response += newText;
-    // // bot.telegram.deleteMessage(chatId, messageId);
-    // await ctx
-    //   .sendMessage(response, messageId, undefined, newText)
-    //   .then(() => {
-    //     console.log("Message edited successfully");
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error editing message:", error);
-    //   });
-
-    // await ctx.sendMessage(chunk.choices[0]?.delta?.content);
-    // for await (const chunk of stream) {
-    //   process.stdout.write(chunk.choices[0]?.delta?.content || "");
-    // }
   }
   try {
+    bot.context.chats[ctx.from.id.toString()].push(`AI : ${response}`);
     await prisma.chat.create({
       data: {
         userid: ctx.from.id.toString(),
@@ -691,24 +578,10 @@ bot.on("text", async (ctx) => {
     console.log(e);
     console.log("failed to save chat");
   }
-
-  // await ctx.editMessageCaption(response);
 });
 async function main() {
-  // const stream = await openai.chat.completions.create({
-  //   messages: [
-  //     { role: "user", content: "Say this is a test and write a small poem" },
-  //   ],
-  //   model: "gpt-3.5-turbo",
-  //   stream: true,
-  // });
-  // for await (const chunk of stream) {
-  //   process.stdout.write(chunk.choices[0]?.delta?.content || "");
-  // }
-  // console.log(chatCompletion);
-
   bot.launch();
 }
 
-main();
+main().catch((e) => console.log(e));
 module.exports = { bot };

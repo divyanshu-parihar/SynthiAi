@@ -1,0 +1,74 @@
+const { prisma } = require("../handler/database");
+const fs = require("node:fs");
+const path = require("path");
+async function exportDialogs(ctx) {
+  console.log("file exporting");
+  let interactionid = ctx.match[0].split("-")[1];
+  try {
+    const data = await prisma.interaction.findFirst({
+      where: {
+        id: parseInt(interactionid),
+      },
+    });
+
+    const chats = await prisma.chat.findMany({
+      where: {
+        interactionId: data.id,
+      },
+    });
+    const html = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Database Information</title>
+            </head>
+            <body style="text-align:center">
+                <h1>Interaction Log:</h1>
+                        ${chats
+                          .map(
+                            (row) => `
+                            <div style="border: 2px solid black; margin: 2px;">
+                                <div style="margin: 2px;background-color: yellow;">${
+                                  row.prompt.split("prompt :")[1]
+                                }</div>
+                                <div style="padding:2px;">${row.response}</div>
+                               
+                            </div>
+                        `
+                          )
+                          .join("")}
+                    
+            </body>
+            </html>
+        `;
+
+    // Write HTML to file
+    fs.writeFile(
+      path.join(__dirname, "temp", ctx.from.id.toString() + ".html"),
+      html,
+      "utf8",
+      async (err) => {
+        if (err) {
+          console.error("Error writing HTML file:", err);
+
+          return;
+        }
+      }
+    );
+    await ctx.replyWithDocument({
+      source: path.join(__dirname, ctx.from.id.toString() + ".html"),
+    });
+
+    fs.unlink(path.join(__dirname, ctx.from.id.toString() + ".html"), () =>
+      console.log("file deleted")
+    );
+  } catch (e) {
+    console.log(e);
+    await ctx.reply("could not find dialogs");
+    return;
+  }
+}
+
+module.exports = exportDialogs;

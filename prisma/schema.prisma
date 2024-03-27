@@ -21,6 +21,14 @@ model interaction {
   chats  chat[]
 }
 
+model userSettings {
+  id       Int    @id @unique @default(autoincrement())
+  userid   String @unique
+  username String
+  language String
+  gpt      String
+}
+
 model currentInteraction {
   id                 Int    @id @unique @default(autoincrement())
   userid             String @unique
@@ -40,4 +48,16 @@ model currentAssitant {
   id       Int    @id @unique @default(autoincrement())
   userid   String @unique
   chatMode String
+}
+
+//  subscription schema
+
+model userPurchasedToken {
+  id     Int    @id @unique @default(autoincrement())
+  userid String
+  token  Int
+}
+
+model Subscription {
+  id Int @id @unique @default(autoincrement())
 }
