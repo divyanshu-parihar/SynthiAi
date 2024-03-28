@@ -19,7 +19,7 @@ async function menu(ctx) {
           [
             {
               text: "XEI Portal",
-              url: "https://xei.gitbook.io/documentation/utility/synthi-ai-assistant",
+              callback_data: "portal",
             },
           ],
         ],

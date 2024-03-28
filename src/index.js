@@ -4,6 +4,7 @@ const path = require("path");
 const OpenAI = require("openai");
 const axios = require("axios");
 const dotenv = require("dotenv");
+const GibberishDetector = require("gibberish-detector");
 
 const { SQLite } = require("@telegraf/session/sqlite");
 
@@ -33,6 +34,17 @@ const bot = new Telegraf(process.env.BOT_TOKEN, {});
 bot.context.chats = {};
 
 bot.use(session({ store }));
+bot.action("portal", async (ctx) => {
+  await ctx.editMessageText("XEI Portal: ");
+  await ctx.editMessageReplyMarkup(
+    Markup.inlineKeyboard([
+      [{ text: "X", url: "https://x.com/xei_official" }],
+      [{ text: "website", url: "https://www.xei.ai" }],
+      [{ text: "whitepaper", url: "https://xei.gitbook.io/documentation" }],
+      [{ text: "Back", callback_data: "BackMenu" }],
+    ]).reply_markup
+  );
+});
 bot.on("voice", async (ctx) => {
   console.log(ctx);
 
@@ -42,8 +54,8 @@ bot.on("voice", async (ctx) => {
     },
   });
 
-  if (data.chatMode == "") {
-    await ctx.reply("Please select a chatMode");
+  if (data.chatMode != "VoiceGPT") {
+    await ctx.reply("Please select a VoiceGPT chat mode. use: /menu");
     return;
   }
   // download audio
@@ -145,7 +157,7 @@ bot.start(async (ctx) => {
   - ... I can do anything!
   If you need help, go to 🏠 Menu:
     ⤷ Command: /menu`);
-  await ctx.reply(`Let's get started!`);
+  await ctx.reply(`Let's get started! use /new to start a new interaction.`);
 
   try {
     await prisma.userSettings.create({
@@ -210,28 +222,35 @@ bot.hears("/new", (ctx) => {
   start(ctx, bot);
 });
 bot.action("VoiceGPT", async (ctx) => {
-  // TODO: check for subscription
-  await prisma.currentAssitant.update({
-    data: {
-      chatMode: "VoiceGPT",
-    },
-    where: {
-      userid: ctx.from.id.toString(),
-    },
-  });
-
+  try {
+    await prisma.currentAssitant.update({
+      data: {
+        chatMode: "VoiceGPT",
+      },
+      where: {
+        userid: ctx.from.id.toString(),
+      },
+    });
+  } catch (e) {
+    console.log(e);
+  }
   await ctx.reply("Start sending the voice prompts..");
 });
 bot.action("ImageGenerationMode", async (ctx) => {
   // TODO: check for subscription
-  await prisma.currentAssitant.update({
-    data: {
-      chatMode: "ImageGenerationMode",
-    },
-    where: {
-      userid: ctx.from.id.toString(),
-    },
-  });
+  try {
+    await prisma.currentAssitant.update({
+      data: {
+        chatMode: "ImageGenerationMode",
+      },
+      where: {
+        userid: ctx.from.id.toString(),
+      },
+    });
+  } catch (e) {
+    console.log(e);
+    console.log("Looks Like you never ran /new");
+  }
 
   await ctx.reply("Start sending the image prompts..");
 });
@@ -396,10 +415,15 @@ bot.action("BackMenu", async (ctx) => {
       [{ text: "Gift Tokens", callback_data: "GiftToken" }],
       [{ text: "Balance(Subscription)", callback_data: "Balance" }],
       [
-        { text: "Settings", callback_data: "Settings" },
+        { text: "Settings", callback_data: "settings" },
         { text: "Help", callback_data: "Help" },
       ],
-      [{ text: "Open in browser", url: "telegraf.js.org" }],
+      [
+        {
+          text: "XEI Portal",
+          callback_data: "portal",
+        },
+      ],
     ]).reply_markup
   );
 });
@@ -432,30 +456,50 @@ for (const el of profiles) {
 }
 
 bot.on("text", async (ctx) => {
-  if (bot.context.chatBoost)
-    if (bot.context[ctx.from.id.toString()]) {
-      await prisma.userSettings.update({
-        data: {
-          username: ctx.message.text,
-        },
-        where: {
-          userid: ctx.from.id.toString(),
-        },
-      });
+  // gibbrish detection
 
-      await ctx.reply("You name changed! Welcome, " + ctx.message.text);
-      console.log("here");
-      bot.context[ctx.from.id.toString()] = false;
-      return;
-    }
+  let chance = GibberishDetector.detect(ctx.message.text);
+  if (chance > 55) {
+    await ctx.reply(
+      "It looks like you misspelled something or your message does not have any specific message..\n feel free to ask specific qurestion. "
+    );
 
+    return;
+  }
+
+  // if (bot.context.chatBoost)
+  if (bot.context[ctx.from.id.toString()]) {
+    await prisma.userSettings.update({
+      data: {
+        username: ctx.message.text,
+      },
+      where: {
+        userid: ctx.from.id.toString(),
+      },
+    });
+
+    await ctx.reply("You name changed! Welcome, " + ctx.message.text);
+    console.log("here");
+    bot.context[ctx.from.id.toString()] = false;
+    return;
+  }
+  const currentInteractionData = await prisma.currentInteraction.findFirst({
+    where: {
+      userid: ctx.from.id.toString(),
+    },
+  });
+  if (!currentInteractionData) {
+    return await ctx.reply(
+      "Please start a new Interaction with /new before sending a new prompt before send thiging a new prompt before send thiging a new prompt before send thiging a new prompt before send thiging a new prompt before send thiging a new prompt before send thiging a new prompt before send thiging a new prompt before sending a new Interaction."
+    );
+  }
   const data = await prisma.currentAssitant.findFirst({
     where: {
       userid: ctx.from.id.toString(),
     },
   });
   if (!data) {
-    await ctx.reply("Plese select any chatbot settings/menu");
+    await ctx.reply("Plese select any CHATBOT /menu");
     return;
   }
   if (data.chatMode == "ImageGenerationMode") {
@@ -474,14 +518,6 @@ bot.on("text", async (ctx) => {
 
     await ctx.sendPhoto(image_url);
     return;
-  }
-  const currentInteractionData = await prisma.currentInteraction.findFirst({
-    where: {
-      userid: ctx.from.id.toString(),
-    },
-  });
-  if (!currentInteractionData) {
-    return await ctx.reply("Please start a new Interaction with /new");
   }
   const interaction = await prisma.interaction.findFirst({
     where: {
@@ -509,15 +545,15 @@ bot.on("text", async (ctx) => {
     await ctx.reply("Looks like you have not ran /start. Please run it .");
     return;
   }
-
+  console.log(data);
   // might slow it down in long term. consider making 2 configs. one for name and other description
   const desc = config.profiles.find((el) => el.name == data.chatMode);
 
-  if (data.chatMode == "") {
-    await ctx.reply("Please select a chatMode. /menu");
-    return;
-  }
-
+  // if (data.chatMode == "") {
+  //   await ctx.reply("Please select a chatMode. /menu");
+  //   return;
+  // }
+  console.log(desc);
   const el = { name: data["chatMode"], desc: desc.desc };
 
   try {
@@ -582,6 +618,10 @@ bot.on("text", async (ctx) => {
 async function main() {
   bot.launch();
 }
+try {
+  main();
+} catch (e) {
+  console.log(e);
+}
 
-main().catch((e) => console.log(e));
 module.exports = { bot };

@@ -3,30 +3,30 @@ const { prisma } = require("../handler/database");
 async function start(ctx, bot) {
   bot.context.chats[ctx.from.id.toString()] = [];
   const userId = ctx.from.id.toString();
-  const interaction = await prisma.currentAssitant.findFirst({
-    where: {
-      userid: userId,
-    },
-  });
+  // const interaction = await prisma.currentAssitant.findFirst({
+  //   where: {
+  //     userid: userId,
+  //   },
+  // });
 
-  if (interaction) {
-    await prisma.currentAssitant.update({
-      data: {
-        chatMode: "",
-      },
-      where: {
-        userid: userId,
-      },
-    });
-  } else {
-    await prisma.currentAssitant.create({
-      data: {
-        // id: prisma.ui,
-        userid: userId,
-        chatMode: "",
-      },
-    });
-  }
+  // if (interaction) {
+  //   await prisma.currentAssitant.update({
+  //     data: {
+  //       chatMode: "Assistant",
+  //     },
+  //     where: {
+  //       userid: userId,
+  //     },
+  //   });
+  // } else {
+  //   await prisma.currentAssitant.create({
+  //     data: {
+  //       // id: prisma.ui,
+  //       userid: userId,
+  //       chatMode: "Assistant",
+  //     },
+  //   });
+  // }
   const data = await prisma.interaction.create({
     data: {
       userid: ctx.from.id.toString(),
@@ -70,7 +70,7 @@ async function start(ctx, bot) {
   if (row) {
     await prisma.currentAssitant.update({
       data: {
-        chatMode: "",
+        chatMode: "Assistant",
       },
       where: {
         userid: userId,
@@ -79,10 +79,8 @@ async function start(ctx, bot) {
   } else {
     await prisma.currentAssitant.create({
       data: {
-        // id: prisma.ui,
         userid: userId,
-
-        chatMode: "",
+        chatMode: "Assistant",
       },
     });
   }
@@ -106,7 +104,6 @@ async function start(ctx, bot) {
   Commands:
   ⚪ /menu – Menu
   ⚪ /balance – Account balance (Subscription)
-  ⚪ /mode – Select chat mode
   ⚪ /new – Start new dialog
   ⚪ /settings – Show settings
   
