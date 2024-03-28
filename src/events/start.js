@@ -91,6 +91,7 @@ async function start(ctx, bot) {
         language: "ENGLISH",
         username: ctx.from.username,
         gpt: "gpt-3.5-turbo",
+        response: "short",
       },
     });
   } catch (e) {

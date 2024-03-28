@@ -27,7 +27,10 @@ async function selectChat(ctx) {
       ],
       //   [{ text: "GPT4(PRO)", callback_data: "GPT4" }],
       ...keyboard,
-      [{ text: "Next", callback_data: "next-" + currentIndex }],
+      [
+        // { text: "Back", callback_data: "next-" + toString(currentIndex - 5) },
+        { text: "Next", callback_data: "next-" + currentIndex },
+      ],
       [{ text: "Back to menu", callback_data: "BackMenu" }],
     ]).reply_markup,
     { message_id: messageId }

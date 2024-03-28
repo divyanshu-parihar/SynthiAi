@@ -27,6 +27,7 @@ model userSettings {
   username String
   language String
   gpt      String
+  response String
 }
 
 model currentInteraction {

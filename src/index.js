@@ -46,7 +46,7 @@ bot.action("portal", async (ctx) => {
   );
 });
 bot.on("voice", async (ctx) => {
-  console.log(ctx);
+  // console.log(ctx);
 
   const data = await prisma.currentAssitant.findFirst({
     where: {
@@ -59,7 +59,7 @@ bot.on("voice", async (ctx) => {
     return;
   }
   // download audio
-  console.log(ctx);
+  // console.log(ctx);
   const audio = ctx.message.voice;
   const audioLink = await ctx.telegram.getFileLink(audio.file_id);
 
@@ -82,7 +82,7 @@ bot.on("voice", async (ctx) => {
 
   // Listen for when the file writing is complete
   writeStream.on("finish", async () => {
-    console.log("Audio file saved successfully:", filePath);
+    // console.log("Audio file saved successfully:", filePath);
 
     const transcription = await openai.audio.transcriptions.create({
       file: fs.createReadStream(filePath),
@@ -91,7 +91,7 @@ bot.on("voice", async (ctx) => {
 
     // fs.dele;
 
-    console.log(transcription);
+    // console.log(transcription);
     await ctx.reply("YOU: \n" + transcription.text);
     fs.unlinkSync(filePath, (e) => console.log("could not delete"));
     // console.log(transcription.text);
@@ -107,10 +107,10 @@ bot.on("voice", async (ctx) => {
     // const el = { name: data["chatMode"], desc: desc.desc };
     const prompt = `I want you to act like you are GPT4.
     prompt : ${transcription.text}`;
-    console.log(prompt);
+    // console.log(prompt);
 
     let message = await ctx.reply("...");
-    console.log(settings.gpt);
+    // console.log(settings.gpt);
     const stream = await openai.chat.completions.create({
       model: settings.gpt,
       messages: [{ role: "user", content: prompt }],
@@ -249,7 +249,8 @@ bot.action("ImageGenerationMode", async (ctx) => {
     });
   } catch (e) {
     console.log(e);
-    console.log("Looks Like you never ran /new");
+    await ctx.reply("Looks Like you never ran /new");
+    return;
   }
 
   await ctx.reply("Start sending the image prompts..");
@@ -293,9 +294,9 @@ bot.action("AIMODEL", async (ctx) => {
   }
 });
 bot.action(/changeGPT|w+/, async (ctx) => {
-  console.log(ctx.match.input);
+  // console.log(ctx.match.input);
   const response = ctx.match.input.split("|")[1];
-  console.log(response);
+  // console.log(response);
   if (response == "chagpt-3.5-turbo") {
     await prisma.userSettings.update({
       data: {
@@ -330,10 +331,30 @@ bot.action("settings", async (ctx) => {
             callback_data: "changeUsername",
           },
         ],
-        [{ text: "AI Model", callback_data: "AIMODEL" }],
+
+        [
+          { text: "Short Response", callback_data: "Response-short" },
+          { text: "Detailed Model", callback_data: "Response-detailed" },
+        ][{ text: "AI Model", callback_data: "AIMODEL" }],
         [{ text: "Back to menu", callback_data: "BackMenu" }],
       ]).reply_markup
     );
+  } catch (e) {
+    console.log(e);
+  }
+});
+
+bot.action(/^Response-\w+/, async (ctx) => {
+  const text = ctx.match[0].split("-")[1];
+  try {
+    await prisma.userSettings.update({
+      data: {
+        response: text,
+      },
+      where: {
+        userid: ctx.from.id.toString(),
+      },
+    });
   } catch (e) {
     console.log(e);
   }
@@ -378,9 +399,10 @@ bot.action("ConfirmDeleteAllDialogs", async (ctx) => {
     console.log(e);
   }
 });
-bot.action(/next-\d+/, async (ctx) => {
+bot.action(/back-\d+/, async (ctx) => {
   let data = ctx.match[0].split("-")[1];
   // const data = ctx.match[1].split("-")[1];
+  console.log("back", data);
 
   let profiles = config.profiles.slice(data, data + 5);
 
@@ -389,13 +411,45 @@ bot.action(/next-\d+/, async (ctx) => {
     console.log(el);
     keyboard.push([{ text: el.name, callback_data: el.name }]);
   }
-  data += 5;
+  const newLoc = parseInt(data) + 5;
 
   try {
     await ctx.editMessageReplyMarkup(
       Markup.inlineKeyboard([
         ...keyboard,
-        [{ text: "Next", callback_data: "next-" + parseInt(data) }],
+        [
+          // { text: "Back", callback_data: "next-" + toString(currentIndex - 5) },
+          { text: "Back", callback_data: "back-" + parseInt(data - 5) },
+          { text: "Next", callback_data: "next-" + parseInt(newLoc) },
+        ],
+        [{ text: "Back to menu", callback_data: "BackMenu" }],
+      ]).reply_markup
+    );
+  } catch (e) {}
+});
+bot.action(/next-\d+/, async (ctx) => {
+  let data = ctx.match[0].split("-")[1];
+  // const data = ctx.match[1].split("-")[1];
+  // console.log(data);
+
+  let profiles = config.profiles.slice(data, data + 5);
+
+  let keyboard = [];
+  for (let el of profiles) {
+    console.log(el);
+    keyboard.push([{ text: el.name, callback_data: el.name }]);
+  }
+  const newLoc = parseInt(data) + 5;
+
+  try {
+    await ctx.editMessageReplyMarkup(
+      Markup.inlineKeyboard([
+        ...keyboard,
+        [
+          // { text: "Back", callback_data: "next-" + toString(currentIndex - 5) },
+          { text: "Back", callback_data: "back-" + parseInt(data - 5) },
+          { text: "Next", callback_data: "next-" + parseInt(newLoc) },
+        ],
         [{ text: "Back to menu", callback_data: "BackMenu" }],
       ]).reply_markup
     );
@@ -463,7 +517,6 @@ bot.on("text", async (ctx) => {
     await ctx.reply(
       "It looks like you misspelled something or your message does not have any specific message..\n feel free to ask specific qurestion. "
     );
-
     return;
   }
 
@@ -479,7 +532,7 @@ bot.on("text", async (ctx) => {
     });
 
     await ctx.reply("You name changed! Welcome, " + ctx.message.text);
-    console.log("here");
+    // console.log("here");
     bot.context[ctx.from.id.toString()] = false;
     return;
   }
@@ -512,9 +565,9 @@ bot.on("text", async (ctx) => {
       n: 1,
     });
 
-    console.log(response);
+    // console.log(response);
     image_url = response.data[0].url;
-    console.log(image_url);
+    // console.log(image_url);
 
     await ctx.sendPhoto(image_url);
     return;
@@ -541,11 +594,12 @@ bot.on("text", async (ctx) => {
       userid: ctx.from.id.toString(),
     },
   });
+  // console.log("settings");
   if (!settings) {
     await ctx.reply("Looks like you have not ran /start. Please run it .");
     return;
   }
-  console.log(data);
+  // console.log(data);
   // might slow it down in long term. consider making 2 configs. one for name and other description
   const desc = config.profiles.find((el) => el.name == data.chatMode);
 
@@ -553,7 +607,7 @@ bot.on("text", async (ctx) => {
   //   await ctx.reply("Please select a chatMode. /menu");
   //   return;
   // }
-  console.log(desc);
+  // console.log(desc);
   const el = { name: data["chatMode"], desc: desc.desc };
 
   try {
@@ -568,10 +622,10 @@ bot.on("text", async (ctx) => {
   description : ${el.desc},
   word limit : 20 words,
   prompt : ${bot.context.chats[ctx.from.id.toString()].join()}`;
-  console.log(prompt);
+  // console.log(prompt);
 
   let message = await ctx.reply("...");
-  console.log(settings.gpt);
+  // console.log(settings.gpt);
   const stream = await openai.chat.completions.create({
     model: settings.gpt,
     messages: [{ role: "user", content: prompt }],
