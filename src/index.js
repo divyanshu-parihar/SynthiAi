@@ -166,9 +166,12 @@ bot.start(async (ctx) => {
         username: ctx.from.username,
         language: "ENGLISH",
         gpt: "gpt-3.5-turbo",
+        response: "short",
       },
     });
-  } catch (e) {}
+  } catch (e) {
+    console.log(e);
+  }
 });
 bot.action("Help", async (ctx) => {
   await ctx.reply(`I'm Synthi AI 🤖
