@@ -9,7 +9,9 @@ async function selectChat(ctx) {
     console.log(el);
     keyboard.push([{ text: el.name, callback_data: el.name }]);
   }
-  await ctx.editMessageText("Select chat mode (73 modes available");
+  await ctx.editMessageText(
+    `Select chat mode (${config.profiles.length + 2} modes available)`
+  );
   const messageId = ctx.update.callback_query.message.message_id;
   await ctx.editMessageReplyMarkup(
     Markup.inlineKeyboard([

@@ -163,7 +163,7 @@ bot.start(async (ctx) => {
     await prisma.userSettings.create({
       data: {
         userid: ctx.from.id.toString(),
-        username: ctx.from.username,
+        username: ctx.from.username || "User",
         language: "ENGLISH",
         gpt: "gpt-3.5-turbo",
         response: "short",

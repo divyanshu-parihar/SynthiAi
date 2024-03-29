@@ -8,3 +8,22 @@
 
 3. Settings
 4. Referrals and revenue sharing
+
+
+
+
+
+// Menu
+
+
+
+[Error: ENOENT: no such file or directory, open '/Applications/Divyanshu Parihar/javascript projects/synth ai bot/src/1291874393.ogg'] 
+
+
+
+
+interaction
+
+1. diable next button for no dialogs and main Menu
+2. Question spelling mistake.
+3. make / mode work
