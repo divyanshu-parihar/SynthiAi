@@ -158,7 +158,7 @@ bot.start(async (ctx) => {
   If you need help, go to 🏠 Menu:
     ⤷ Command: /menu`);
   await ctx.reply(`Let's get started! use /new to start a new interaction.`);
-
+  console.log("username", ctx.from.username);
   try {
     await prisma.userSettings.create({
       data: {
@@ -323,6 +323,33 @@ bot.action(/changeGPT|w+/, async (ctx) => {
 
   await ctx.reply("GPT changed!");
 });
+
+bot.hears("/settings", async (ctx) => {
+  try {
+    await ctx.reply(`⚙️ Settings:`, {
+      reply_markup: {
+        inline_keyboard: [
+          /* Inline buttons. 2 side-by-side */
+          [
+            {
+              text: "Username",
+              callback_data: "changeUsername",
+            },
+          ],
+
+          // [
+          //   { text: "Short Response", callback_data: "Response-short" },
+          //   { text: "Detailed Model", callback_data: "Response-detailed" },
+          // ],
+          [{ text: "AI Model", callback_data: "AIMODEL" }],
+          [{ text: "Back to menu", callback_data: "BackMenu" }],
+        ],
+      },
+    });
+  } catch (e) {
+    console.log(e);
+  }
+});
 bot.action("settings", async (ctx) => {
   try {
     await ctx.editMessageText("⚙️ Settings:");
@@ -335,10 +362,11 @@ bot.action("settings", async (ctx) => {
           },
         ],
 
-        [
-          { text: "Short Response", callback_data: "Response-short" },
-          { text: "Detailed Model", callback_data: "Response-detailed" },
-        ][{ text: "AI Model", callback_data: "AIMODEL" }],
+        // [
+        //   { text: "Short Response", callback_data: "Response-short" },
+        //   { text: "Detailed Model", callback_data: "Response-detailed" },
+        // ],
+        [{ text: "AI Model", callback_data: "AIMODEL" }],
         [{ text: "Back to menu", callback_data: "BackMenu" }],
       ]).reply_markup
     );
@@ -468,9 +496,9 @@ bot.action("BackMenu", async (ctx) => {
     Markup.inlineKeyboard([
       [{ text: "Select Chat Mode", callback_data: "SelectChat" }],
       [{ text: "Dialog History", callback_data: "Dialog-0" }],
-      [{ text: "Get Free Tokens", callback_data: "FreeTokens" }],
-      [{ text: "Gift Tokens", callback_data: "GiftToken" }],
-      [{ text: "Balance(Subscription)", callback_data: "Balance" }],
+      // [{ text: "Get Free Tokens", callback_data: "FreeTokens" }],
+      // [{ text: "Gift Tokens", callback_data: "GiftToken" }],
+      // [{ text: "Balance(Subscription)", callback_data: "Balance" }],
       [
         { text: "Settings", callback_data: "settings" },
         { text: "Help", callback_data: "Help" },
@@ -515,14 +543,6 @@ for (const el of profiles) {
 bot.on("text", async (ctx) => {
   // gibbrish detection
 
-  let chance = GibberishDetector.detect(ctx.message.text);
-  if (chance > 55) {
-    await ctx.reply(
-      "It looks like you misspelled something or your message does not have any specific message..\n feel free to ask specific qurestion. "
-    );
-    return;
-  }
-
   // if (bot.context.chatBoost)
   if (bot.context[ctx.from.id.toString()]) {
     await prisma.userSettings.update({
@@ -539,6 +559,14 @@ bot.on("text", async (ctx) => {
     bot.context[ctx.from.id.toString()] = false;
     return;
   }
+
+  let chance = GibberishDetector.detect(ctx.message.text);
+  if (chance > 55) {
+    await ctx.reply(
+      "It looks like you misspelled something or your message does not have any specific message..\n feel free to ask specific qurestion. "
+    );
+    return;
+  }
   const currentInteractionData = await prisma.currentInteraction.findFirst({
     where: {
       userid: ctx.from.id.toString(),
@@ -546,7 +574,7 @@ bot.on("text", async (ctx) => {
   });
   if (!currentInteractionData) {
     return await ctx.reply(
-      "Please start a new Interaction with /new before sending a new prompt before send thiging a new prompt before send thiging a new prompt before send thiging a new prompt before send thiging a new prompt before send thiging a new prompt before send thiging a new prompt before send thiging a new prompt before sending a new Interaction."
+      "Please resend the message after creating a interaction with /new."
     );
   }
   const data = await prisma.currentAssitant.findFirst({
@@ -673,6 +701,7 @@ bot.on("text", async (ctx) => {
   }
 });
 async function main() {
+  console.log("Starting the bot...");
   bot.launch();
 }
 try {

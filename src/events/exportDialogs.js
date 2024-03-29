@@ -16,6 +16,7 @@ async function exportDialogs(ctx) {
         interactionId: data.id,
       },
     });
+    console.log(data, chats);
     const html = `
             <!DOCTYPE html>
             <html lang="en">
@@ -46,7 +47,7 @@ async function exportDialogs(ctx) {
 
     // Write HTML to file
     fs.writeFile(
-      path.join(__dirname, "temp", ctx.from.id.toString() + ".html"),
+      path.join(__dirname, ctx.from.id.toString() + ".html"),
       html,
       "utf8",
       async (err) => {
@@ -66,7 +67,7 @@ async function exportDialogs(ctx) {
     );
   } catch (e) {
     console.log(e);
-    await ctx.reply("could not find dialogs");
+    await ctx.reply("could not generate dialogs");
     return;
   }
 }
