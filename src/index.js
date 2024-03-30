@@ -606,13 +606,13 @@ bot.on("text", async (ctx) => {
     return;
   }
 
-  let chance = GibberishDetector.detect(ctx.message.text);
-  if (chance > 70) {
-    await ctx.reply(
-      "It looks like you misspelled something or your message does not have any specific message..\nfeel free to ask specific question. "
-    );
-    return;
-  }
+  // let chance = GibberishDetector.detect(ctx.message.text);
+  // if (chance > 70) {
+  //   await ctx.reply(
+  //     "It looks like you misspelled something or your message does not have any specific message..\nfeel free to ask specific question. "
+  //   );
+  //   return;
+  // }
   const currentInteractionData = await prisma.currentInteraction.findFirst({
     where: {
       userid: ctx.from.id.toString(),
@@ -697,7 +697,7 @@ bot.on("text", async (ctx) => {
     el.name
   }. here is the description for your mode and reply as per your descripton without mentioned that your are an ai:
   description : ${el.desc},
-  word limit : 20 words,
+
   prompt : ${bot.context.chats[ctx.from.id.toString()].join()}`;
   // console.log(prompt);
 
