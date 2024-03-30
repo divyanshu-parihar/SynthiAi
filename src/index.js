@@ -45,6 +45,47 @@ bot.action("portal", async (ctx) => {
     ]).reply_markup
   );
 });
+const changeMode = async (ctx, index) => {
+  currentIndex = index;
+  let profiles = config.profiles.slice(currentIndex, currentIndex + 5);
+  let keyboard = [];
+  for (let el of profiles) {
+    console.log(el);
+    keyboard.push([{ text: el.name, callback_data: el.name }]);
+  }
+
+  if (config.profiles.length - (currentIndex + 5) > 0)
+    keyboard.push([
+      // { text: "Back", callback_data: "next-" + toString(currentIndex - 5) },
+      { text: "Next", callback_data: "next-" + currentIndex },
+    ]);
+  keyboard.push([{ text: "Back to menu", callback_data: "BackMenu" }]);
+  await ctx.reply(
+    `Select chat mode (${config.profiles.length + 2} modes available)`,
+    {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Dalle(Image Generation)",
+              callback_data: "ImageGenerationMode",
+            },
+          ],
+          [
+            {
+              text: "VoiceGPT(audio message prompt)",
+              callback_data: "VoiceGPT",
+            },
+          ],
+          //   [{ text: "GPT4(PRO)", callback_data: "GPT4" }],
+          ...keyboard,
+        ],
+      },
+    }
+  );
+};
+
+bot.hears("/mode", async (ctx) => changeMode(ctx, 0));
 bot.on("voice", async (ctx) => {
   // console.log(ctx);
 
@@ -285,7 +326,7 @@ bot.action("AIMODEL", async (ctx) => {
         [
           {
             text: "ChatGPT3 turbo",
-            callback_data: "changeGPT|chagpt-3.5-turbo",
+            callback_data: "changeGPT|chatgpt-3.5-turbo",
           },
           { text: "GPT4", callback_data: "changeGPT|gpt-4-turbo-preview" },
         ],
@@ -300,7 +341,7 @@ bot.action(/changeGPT|w+/, async (ctx) => {
   // console.log(ctx.match.input);
   const response = ctx.match.input.split("|")[1];
   // console.log(response);
-  if (response == "chagpt-3.5-turbo") {
+  if (response == "chatgpt-3.5-turbo") {
     await prisma.userSettings.update({
       data: {
         gpt: response,
@@ -472,6 +513,12 @@ bot.action(/next-\d+/, async (ctx) => {
   }
   const newLoc = parseInt(data) + 5;
 
+  console.log(config.profiles.length, newLoc);
+
+  if (newLoc < config.profiles.length)
+    keyboard.push([
+      { text: "Next", callback_data: "next-" + parseInt(newLoc) },
+    ]);
   try {
     await ctx.editMessageReplyMarkup(
       Markup.inlineKeyboard([
@@ -479,7 +526,6 @@ bot.action(/next-\d+/, async (ctx) => {
         [
           // { text: "Back", callback_data: "next-" + toString(currentIndex - 5) },
           { text: "Back", callback_data: "back-" + parseInt(data - 5) },
-          { text: "Next", callback_data: "next-" + parseInt(newLoc) },
         ],
         [{ text: "Back to menu", callback_data: "BackMenu" }],
       ]).reply_markup
@@ -561,9 +607,9 @@ bot.on("text", async (ctx) => {
   }
 
   let chance = GibberishDetector.detect(ctx.message.text);
-  if (chance > 55) {
+  if (chance > 70) {
     await ctx.reply(
-      "It looks like you misspelled something or your message does not have any specific message..\n feel free to ask specific qurestion. "
+      "It looks like you misspelled something or your message does not have any specific message..\nfeel free to ask specific question. "
     );
     return;
   }

@@ -13,6 +13,7 @@ async function history(ctx) {
 
     if (data.length == 0) {
       await ctx.reply("No Chats in this interaction");
+      return;
     }
     const list = data.slice(index, index + 4);
     if (list.length == 0) {

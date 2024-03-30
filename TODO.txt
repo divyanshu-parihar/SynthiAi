@@ -24,6 +24,10 @@
 
 interaction
 
-1. diable next button for no dialogs and main Menu
-2. Question spelling mistake.
-3. make / mode work
+1. diable next button for no dialogs and main Menu[x]
+2. Question spelling mistake.[x] 
+3. make /mode work [done]
+4. test gibberish text for more accuracy tuning. [x]
+5. add menu
+
+dev bot and qa bot
