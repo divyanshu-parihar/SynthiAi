@@ -481,23 +481,41 @@ bot.action(/back-\d+/, async (ctx) => {
   let data = ctx.match[0].split("-")[1];
   // const data = ctx.match[1].split("-")[1];
   console.log("back", data);
-
   let profiles = config.profiles.slice(data, data + 5);
 
   let keyboard = [];
+
+  if (data == 0) {
+    keyboard.push([
+      {
+        text: "Dalle(Image Generation)",
+        callback_data: "ImageGenerationMode",
+      },
+    ]);
+    keyboard.push([
+      {
+        text: "VoiceGPT(audio message prompt)",
+        callback_data: "VoiceGPT",
+      },
+    ]);
+  }
   for (let el of profiles) {
-    console.log(el);
+    // console.log(el);
     keyboard.push([{ text: el.name, callback_data: el.name }]);
   }
   const newLoc = parseInt(data) + 5;
-
+  if (parseInt(data - 5) >= 0) {
+    keyboard.push([
+      { text: "Back", callback_data: "back-" + parseInt(data - 5) },
+    ]);
+  }
   try {
     await ctx.editMessageReplyMarkup(
       Markup.inlineKeyboard([
         ...keyboard,
         [
           // { text: "Back", callback_data: "next-" + toString(currentIndex - 5) },
-          { text: "Back", callback_data: "back-" + parseInt(data - 5) },
+
           { text: "Next", callback_data: "next-" + parseInt(newLoc) },
         ],
         [{ text: "Back to menu", callback_data: "BackMenu" }],
@@ -507,19 +525,21 @@ bot.action(/back-\d+/, async (ctx) => {
 });
 bot.action(/next-\d+/, async (ctx) => {
   let data = ctx.match[0].split("-")[1];
-  // const data = ctx.match[1].split("-")[1];
-  // console.log(data);
+  console.log("next", data);
 
-  let profiles = config.profiles.slice(data, data + 5);
+  let sliceValue = data;
+  if (data == 0) sliceValue += 5;
+  let profiles = config.profiles.slice(sliceValue, sliceValue + 5);
 
   let keyboard = [];
   for (let el of profiles) {
-    console.log(el);
+    // console.log(el);
     keyboard.push([{ text: el.name, callback_data: el.name }]);
   }
-  const newLoc = parseInt(data) + 5;
+  let newLoc = parseInt(data) + 5;
 
-  console.log(config.profiles.length, newLoc);
+  // if (data == 5) newLoc += 5;
+  // console.log(config.profiles.length, newLoc);
 
   if (newLoc < config.profiles.length)
     keyboard.push([

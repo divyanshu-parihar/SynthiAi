@@ -32,11 +32,17 @@ async function dialog(ctx) {
   `);
     console.log(keyboard);
 
-    if (filtered.length > historyIndex + 5)
+    if (filtered.length > historyIndex + 5) {
       keyboard.push([
         { text: "Next", callback_data: "Dialog-" + historyIndex },
       ]);
+    }
 
+    if (newLoc < config.profiles.length) {
+      keyboard.push([
+        { text: "Next", callback_data: "next-" + parseInt(newLoc) },
+      ]);
+    }
     keyboard.push([{ text: "Back to menu", callback_data: "BackMenu" }]);
 
     await ctx.editMessageReplyMarkup(
