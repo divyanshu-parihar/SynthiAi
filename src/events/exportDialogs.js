@@ -45,9 +45,13 @@ async function exportDialogs(ctx) {
             </html>
         `;
 
+    if (!fs.existsSync(path.join(__dirname, ctx.from.id.toString()))) {
+      fs.mkdirSync(path.join(__dirname, ctx.from.id.toString()));
+    }
+
     // Write HTML to file
     fs.writeFile(
-      path.join(__dirname, ctx.from.id.toString() + ".html"),
+      path.join(__dirname, ctx.from.id.toString(), "interaction log" + ".html"),
       html,
       "utf8",
       async (err) => {
@@ -59,11 +63,17 @@ async function exportDialogs(ctx) {
       }
     );
     await ctx.replyWithDocument({
-      source: path.join(__dirname, ctx.from.id.toString() + ".html"),
+      caption: "interaction log",
+      source: path.join(
+        __dirname,
+        ctx.from.id.toString(),
+        "interaction log" + ".html"
+      ),
     });
 
-    fs.unlink(path.join(__dirname, ctx.from.id.toString() + ".html"), () =>
-      console.log("file deleted")
+    fs.unlink(
+      path.join(__dirname, ctx.from.id.toString(), "interaction log" + ".html"),
+      () => console.log("file deleted")
     );
   } catch (e) {
     console.log(e);

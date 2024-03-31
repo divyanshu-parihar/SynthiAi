@@ -20,19 +20,36 @@ async function history(ctx) {
       await ctx.reply("No More chats");
       return;
     }
+
+    const escapeMap = {
+      ".": "\\.",
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+      "`": "&#x60;",
+      "\\": "\\\\", // Escape backslash itself
+      // Add more special characters as needed
+    };
     for (const chat of list) {
       let prompt = chat.prompt.split("prompt :")[1];
-      await ctx.reply(`
-      🧑‍💻 You: ${prompt}\n
--
-[Telegram](https://t.me/) | [Twitter](https://twitter.com/) | [Website](https://google.com)
+      await ctx.replyWithMarkdownV2(`
+      🧑‍💻 You: ${prompt
+        .replace(".", " ")
+        .replace(/[&<>"'`.\\]/g, (match) => escapeMap[match])}\n
+\\-
+[Telegram](t.me/SynthiAI_bot) \\| [X](https://twitter.com/xei_official) \\| [Website](https://www.xei.ai)
 Built by SythiAi
       `);
 
-      await ctx.reply(`
-      🧑‍💻 You: ${chat.response}\n
--
-[Telegram](https://t.me/) | [Twitter](https://twitter.com/) | [Website](https://google.com)
+      await ctx.replyWithMarkdownV2(`
+      🧑‍💻 You: ${chat.response.replace(
+        /[&<>"'`.\\]/g,
+        (match) => escapeMap[match]
+      )}\n
+\\-
+[Telegram](t.me/SynthiAI_bot) \\| [X](https://twitter.com/xei_official) \\| [Website](https://www.xei.ai)
 Built by SythiAi
       `);
     }

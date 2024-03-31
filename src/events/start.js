@@ -100,26 +100,25 @@ async function start(ctx, bot) {
   await ctx.reply(
     'Your dialog "🧠 Hello" is saved to 🗂️ Dialog History. You can continue it anytime with /menu command'
   );
-  await ctx.reply(`I'm Synthi AI 🤖
+  await ctx.replyWithMarkdownV2(`I'm Synthi AI 🤖
 
   Commands:
   ⚪ /menu – Menu
-  ⚪ /balance – Account balance (Subscription)
-  ⚪ /new – Start new dialog
+  ⚪ /new – Start new interation\\(required\\) 
   ⚪ /settings – Show settings
   
-  🧠 GPT-4 Turbo is available 
+  🧠 GPT\\-4 Turbo is available 
   🎨 Image Generation mode is live
   🎤 Voice Messages can be used
   
   Key Points to Remember:
-  - Your conversation's length directly influences token consumption; shorter dialogs save tokens
-  - Restart the conversation using the /new command
-  - Utilize English (🇬🇧) for enhanced response quality
+  \\- Your conversation's length directly influences token consumption; shorter dialogs save tokens
+  \\- Restart the conversation using the /new command
+  \\- Utilize English \\(🇬🇧\\) for enhanced response quality
   
-  The GPT-4 Turbo mode uses ten times the tokens compared to ChatGPT.
-  👩🏼‍💻 Support: @marcus_xei - Lead Synthi Architect
-  📜 More details in our page. 
+  The GPT\\-4 Turbo mode uses ten times the tokens compared to ChatGPT\\.
+  👩🏼‍💻 Support: @marcus\\_xei \\- Lead Synthi Architect
+  📜 [More details in our page](https://xei.gitbook.io/documentation/utility/synthi-ai-assistant) \\. 
   `);
 }
 module.exports = start;
