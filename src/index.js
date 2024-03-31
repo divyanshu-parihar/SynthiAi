@@ -540,7 +540,7 @@ bot.action(/next-\d+/, async (ctx) => {
 });
 bot.action("BackMenu", async (ctx) => {
   await ctx.editMessageText(
-    `🫂 Subscribe to our channel to get latest bot updates: @MindAIProject
+    `🫂 Subscribe to our channel to get latest bot updates
 
         🏠 Menu:`
   );
@@ -613,7 +613,8 @@ bot.on("text", async (ctx) => {
   }
 
   // let chance = GibberishDetector.detect(ctx.message.text);
-  // if (chance > 70) {
+  // console.log(chance);
+  // if (chance > 80) {
   //   await ctx.reply(
   //     "It looks like you misspelled something or your message does not have any specific message..\nfeel free to ask specific question. "
   //   );
@@ -640,20 +641,25 @@ bot.on("text", async (ctx) => {
   }
   if (data.chatMode == "ImageGenerationMode") {
     await ctx.reply("Please wait.. Image is being generated.");
-    const response = await openai.images.generate({
-      model: "dall-e-3",
-      prompt: ctx.message.text,
-      size: "1024x1024",
-      quality: "standard",
-      n: 1,
-    });
+    try {
+      const response = await openai.images.generate({
+        model: "dall-e-3",
+        prompt: ctx.message.text,
+        size: "1024x1024",
+        quality: "standard",
+        n: 1,
+      });
 
-    // console.log(response);
-    image_url = response.data[0].url;
-    // console.log(image_url);
+      // console.log(response);
+      image_url = response.data[0].url;
+      // console.log(image_url);
 
-    await ctx.sendPhoto(image_url);
-    return;
+      await ctx.sendPhoto(image_url);
+      return;
+    } catch (e) {
+      await ctx.reply(`Invalid prompit`);
+      return;
+    }
   }
   const interaction = await prisma.interaction.findFirst({
     where: {
