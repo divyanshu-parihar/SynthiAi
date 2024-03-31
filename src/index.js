@@ -101,6 +101,7 @@ bot.on("voice", async (ctx) => {
   }
   // download audio
   // console.log(ctx);
+
   const audio = ctx.message.voice;
   const audioLink = await ctx.telegram.getFileLink(audio.file_id);
 
@@ -326,7 +327,7 @@ bot.action("AIMODEL", async (ctx) => {
         [
           {
             text: "ChatGPT3 turbo",
-            callback_data: "changeGPT|chatgpt-3.5-turbo",
+            callback_data: "changeGPT|gpt-3.5-turbo",
           },
           { text: "GPT4", callback_data: "changeGPT|gpt-4-turbo-preview" },
         ],
@@ -339,30 +340,35 @@ bot.action("AIMODEL", async (ctx) => {
 });
 bot.action(/changeGPT|w+/, async (ctx) => {
   // console.log(ctx.match.input);
-  const response = ctx.match.input.split("|")[1];
-  // console.log(response);
-  if (response == "chatgpt-3.5-turbo") {
-    await prisma.userSettings.update({
-      data: {
-        gpt: response,
-      },
-      where: {
-        userid: ctx.from.id.toString(),
-      },
-    });
-  } else {
-    //TODO :  check for subscription.
-    await prisma.userSettings.update({
-      data: {
-        gpt: response,
-      },
-      where: {
-        userid: ctx.from.id.toString(),
-      },
-    });
-  }
+  try {
+    const response = ctx.match.input.split("|")[1];
+    console.log(response);
+    if (response == "gpt-3.5-turbo") {
+      await prisma.userSettings.update({
+        data: {
+          gpt: response,
+        },
+        where: {
+          userid: ctx.from.id.toString(),
+        },
+      });
+    } else {
+      //TODO :  check for subscription.
+      await prisma.userSettings.update({
+        data: {
+          gpt: response,
+        },
+        where: {
+          userid: ctx.from.id.toString(),
+        },
+      });
+    }
 
-  await ctx.reply("GPT changed!");
+    await ctx.reply(`GPT changed to  ${response}`);
+  } catch (e) {
+    console.log(e);
+    await ctx.reply(`We don't have any record of you. run /start.`);
+  }
 });
 
 bot.hears("/settings", async (ctx) => {
@@ -686,23 +692,28 @@ bot.on("text", async (ctx) => {
   // }
   // console.log(desc);
   const el = { name: data["chatMode"], desc: desc.desc };
-
+  console.log(el);
   try {
-    bot.context.chats[ctx.from.id.toString()].push(`You : ${ctx.message.text}`);
+    bot.context.chats[ctx.from.id.toString()].push(
+      `You : ${ctx.message.text}\n`
+    );
   } catch (e) {
+    console.log(e);
     bot.context.chats[ctx.from.id.toString()] = [];
-    bot.context.chats[ctx.from.id.toString()].push(`You : ${ctx.message.text}`);
+    bot.context.chats[ctx.from.id.toString()].push(
+      `You : ${ctx.message.text}\n`
+    );
   }
   const prompt = `I want you to act like you are in  ${
     el.name
   }. here is the description for your mode and reply as per your descripton without mentioned that your are an ai:
   description : ${el.desc},
-
+  word limit : 10-30 word,
   prompt : ${bot.context.chats[ctx.from.id.toString()].join()}`;
-  // console.log(prompt);
+  console.log(prompt);
 
   let message = await ctx.reply("...");
-  // console.log(settings.gpt);
+  console.log(settings.gpt);
   const stream = await openai.chat.completions.create({
     model: settings.gpt,
     messages: [{ role: "user", content: prompt }],
@@ -714,8 +725,10 @@ bot.on("text", async (ctx) => {
     if (
       chunk.choices[0]?.delta?.content == null ||
       chunk.choices[0]?.delta?.content == ""
-    )
+    ) {
+      console.log("sometthing");
       continue;
+    }
 
     const newText = chunk.choices[0]?.delta?.content || "";
     response += newText;
