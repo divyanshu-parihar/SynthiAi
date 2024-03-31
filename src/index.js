@@ -350,6 +350,7 @@ bot.action(/changeGPT|w+/, async (ctx) => {
           userid: ctx.from.id.toString(),
         },
       });
+      await ctx.reply(`GPT changed to ChatGPT3 turbo.`);
     } else {
       //TODO :  check for subscription.
       await prisma.userSettings.update({
@@ -360,9 +361,9 @@ bot.action(/changeGPT|w+/, async (ctx) => {
           userid: ctx.from.id.toString(),
         },
       });
-    }
 
-    await ctx.reply(`GPT changed to  ${response}`);
+      await ctx.reply(`GPT changed to  GPT4`);
+    }
   } catch (e) {
     console.log(e);
     await ctx.reply(`We don't have any record of you. run /start.`);
