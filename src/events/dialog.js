@@ -1,6 +1,7 @@
 const { fileFromPath } = require("openai");
 const { prisma } = require("../handler/database");
 const { Markup } = require("telegraf");
+
 async function dialog(ctx) {
   let historyIndex = parseInt(ctx.match[0].split("-")[1]);
   // let historyIndex = 0;

@@ -774,7 +774,12 @@ bot.on("text", async (ctx) => {
     response += newText;
   }
 
-  if (response.length % 5 != 0) {
+  if (
+    response.length % 7 == 0 ||
+    response.length % 5 == 0 ||
+    response.length % 2 == 0 ||
+    response.length % 3 == 0
+  ) {
     await bot.telegram.editMessageText(
       message.chat.id,
       message.message_id,
