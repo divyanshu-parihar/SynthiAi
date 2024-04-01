@@ -733,7 +733,7 @@ bot.on("text", async (ctx) => {
     el.name
   }. here is the description for your mode and reply as per your descripton without mentioned that your are an ai:
   description : ${el.desc},
-  word limit : 10-30 word,
+  word limit : 10-100 word,
   prompt : ${bot.context.chats[ctx.from.id.toString()].join()}`;
   console.log(prompt);
 
@@ -752,22 +752,37 @@ bot.on("text", async (ctx) => {
       chunk.choices[0]?.delta?.content == ""
     ) {
       console.log("sometthing");
+      // continue;
+      console.log(chunk.choices[0]?.delta?.content);
+      try {
+        if (response != "" && response != null && response.length != 0)
+          await bot.telegram.editMessageText(
+            message.chat.id,
+            message.message_id,
+            undefined,
+            response
+          );
+      } catch (e) {
+        console.log(e);
+      }
+
+      response = "";
       continue;
     }
 
     const newText = chunk.choices[0]?.delta?.content || "";
     response += newText;
 
-    if (message.text != response) {
-      try {
-        await bot.telegram.editMessageText(
-          message.chat.id,
-          message.message_id,
-          undefined,
-          response
-        );
-      } catch (e) {}
-    }
+    // if (message.text != response) {
+    //   try {
+    //     await bot.telegram.editMessageText(
+    //       message.chat.id,
+    //       message.message_id,
+    //       undefined,
+    //       response
+    //     );
+    //   } catch (e) {}
+    // }
   }
   try {
     bot.context.chats[ctx.from.id.toString()].push(`AI : ${response}`);
