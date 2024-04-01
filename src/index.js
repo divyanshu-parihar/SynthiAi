@@ -676,7 +676,7 @@ bot.on("text", async (ctx) => {
       await ctx.sendPhoto(image_url);
       return;
     } catch (e) {
-      await ctx.reply(`Invalid prompit`);
+      await ctx.reply(`Invalid prompt`);
       return;
     }
   }

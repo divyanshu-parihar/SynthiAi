@@ -22,6 +22,7 @@ async function history(ctx) {
     }
 
     const escapeMap = {
+      "!": "\\!",
       ".": "\\.",
       "&": "&amp;",
       "<": "&lt;",
@@ -37,7 +38,7 @@ async function history(ctx) {
       await ctx.replyWithMarkdownV2(`
       🧑‍💻 You: ${prompt
         .replace(".", " ")
-        .replace(/[&<>"'`.\\]/g, (match) => escapeMap[match])}\n
+        .replace(/[&<>"'`!.\\]/g, (match) => escapeMap[match])}\n
 \\-
 [Telegram](t.me/SynthiAI_bot) \\| [X](https://twitter.com/xei_official) \\| [Website](https://www.xei.ai)
 Built by SythiAi
@@ -45,7 +46,7 @@ Built by SythiAi
 
       await ctx.replyWithMarkdownV2(`
       🧑‍💻 You: ${chat.response.replace(
-        /[&<>"'`.\\]/g,
+        /[&<>"'`!.\\]/g,
         (match) => escapeMap[match]
       )}\n
 \\-
