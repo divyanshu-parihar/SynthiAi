@@ -754,36 +754,36 @@ bot.on("text", async (ctx) => {
       console.log("sometthing");
       // continue;
       console.log(chunk.choices[0]?.delta?.content);
-      try {
-        if (response != "" && response != null && response.length != 0)
-          await bot.telegram.editMessageText(
-            message.chat.id,
-            message.message_id,
-            undefined,
-            response
-          );
-      } catch (e) {
-        console.log(e);
-      }
 
-      response = "";
+      // response = "";
       continue;
     }
 
+    try {
+      if (response != "" && response != null && response.length % 3 == 0)
+        await bot.telegram.editMessageText(
+          message.chat.id,
+          message.message_id,
+          undefined,
+          response
+        );
+    } catch (e) {
+      console.log(e);
+    }
     const newText = chunk.choices[0]?.delta?.content || "";
     response += newText;
-
-    // if (message.text != response) {
-    //   try {
-    //     await bot.telegram.editMessageText(
-    //       message.chat.id,
-    //       message.message_id,
-    //       undefined,
-    //       response
-    //     );
-    //   } catch (e) {}
-    // }
   }
+
+  if (response.length % 5 != 0) {
+    await bot.telegram.editMessageText(
+      message.chat.id,
+      message.message_id,
+      undefined,
+      response
+    );
+  }
+
+  console.log(response);
   try {
     bot.context.chats[ctx.from.id.toString()].push(`AI : ${response}`);
     await prisma.chat.create({
