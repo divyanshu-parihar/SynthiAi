@@ -101,6 +101,7 @@ bot.on("voice", async (ctx) => {
   }
   // download audio
   // console.log(ctx);
+
   const audio = ctx.message.voice;
   const audioLink = await ctx.telegram.getFileLink(audio.file_id);
 
@@ -214,51 +215,49 @@ bot.start(async (ctx) => {
     console.log(e);
   }
 });
+
 bot.action("Help", async (ctx) => {
-  await ctx.reply(`I'm Synthi AI 🤖
+  await ctx.replyWithMarkdownV2(`I'm Synthi AI 🤖
 
   Commands:
   ⚪ /menu – Menu
-  ⚪ /balance – Account balance (Subscription)
-  ⚪ /new – Start new interation(required) 
+  ⚪ /new – Start new interation\\(required\\) 
   ⚪ /settings – Show settings
   
-  🧠 GPT-4 Turbo is available 
+  🧠 GPT\\-4 Turbo is available 
   🎨 Image Generation mode is live
   🎤 Voice Messages can be used
   
   Key Points to Remember:
-  - Your conversation's length directly influences token consumption; shorter dialogs save tokens
-  - Restart the conversation using the /new command
-  - Utilize English (🇬🇧) for enhanced response quality
+  \\- Your conversation's length directly influences token consumption; shorter dialogs save tokens
+  \\- Restart the conversation using the /new command
+  \\- Utilize English \\(🇬🇧\\) for enhanced response quality
   
-  The GPT-4 Turbo mode uses ten times the tokens compared to ChatGPT.
-  👩🏼‍💻 Support: @marcus_xei - Lead Synthi Architect
-  📜 More details in our page. 
+  The GPT\\-4 Turbo mode uses ten times the tokens compared to ChatGPT\\.
+  👩🏼‍💻 Support: @marcus\\_xei \\- Lead Synthi Architect
+  📜 [More details in our page](https://xei.gitbook.io/documentation/utility/synthi-ai-assistant) \\. 
   `);
 });
 bot.hears("/help", async (ctx) => {
-  await ctx.reply(`I'm Synthi AI 🤖
+  await ctx.replyWithMarkdownV2(`I'm Synthi AI 🤖
 
   Commands:
   ⚪ /menu – Menu
-  ⚪ /balance – Account balance (Subscription)
-  ⚪ /mode – Select chat mode
-  ⚪ /new – Start new dialog
+  ⚪ /new – Start new interation\\(required\\) 
   ⚪ /settings – Show settings
   
-  🧠 GPT-4 Turbo is available 
+  🧠 GPT\\-4 Turbo is available 
   🎨 Image Generation mode is live
   🎤 Voice Messages can be used
   
   Key Points to Remember:
-  - Your conversation's length directly influences token consumption; shorter dialogs save tokens
-  - Restart the conversation using the /new command
-  - Utilize English (🇬🇧) for enhanced response quality
+  \\- Your conversation's length directly influences token consumption; shorter dialogs save tokens
+  \\- Restart the conversation using the /new command
+  \\- Utilize English \\(🇬🇧\\) for enhanced response quality
   
-  The GPT-4 Turbo mode uses ten times the tokens compared to ChatGPT.
-  👩🏼‍💻 Support: @marcus_xei - Lead Synthi Architect
-  📜 More details in our page. 
+  The GPT\\-4 Turbo mode uses ten times the tokens compared to ChatGPT\\.
+  👩🏼‍💻 Support: @marcus\\_xei \\- Lead Synthi Architect
+  📜 [More details in our page](https://xei.gitbook.io/documentation/utility/synthi-ai-assistant) \\. 
   `);
 });
 bot.hears("/menu", menu);
@@ -326,7 +325,7 @@ bot.action("AIMODEL", async (ctx) => {
         [
           {
             text: "ChatGPT3 turbo",
-            callback_data: "changeGPT|chatgpt-3.5-turbo",
+            callback_data: "changeGPT|gpt-3.5-turbo",
           },
           { text: "GPT4", callback_data: "changeGPT|gpt-4-turbo-preview" },
         ],
@@ -339,30 +338,36 @@ bot.action("AIMODEL", async (ctx) => {
 });
 bot.action(/changeGPT|w+/, async (ctx) => {
   // console.log(ctx.match.input);
-  const response = ctx.match.input.split("|")[1];
-  // console.log(response);
-  if (response == "chatgpt-3.5-turbo") {
-    await prisma.userSettings.update({
-      data: {
-        gpt: response,
-      },
-      where: {
-        userid: ctx.from.id.toString(),
-      },
-    });
-  } else {
-    //TODO :  check for subscription.
-    await prisma.userSettings.update({
-      data: {
-        gpt: response,
-      },
-      where: {
-        userid: ctx.from.id.toString(),
-      },
-    });
-  }
+  try {
+    const response = ctx.match.input.split("|")[1];
+    console.log(response);
+    if (response == "gpt-3.5-turbo") {
+      await prisma.userSettings.update({
+        data: {
+          gpt: response,
+        },
+        where: {
+          userid: ctx.from.id.toString(),
+        },
+      });
+      await ctx.reply(`GPT changed to ChatGPT3 turbo.`);
+    } else {
+      //TODO :  check for subscription.
+      await prisma.userSettings.update({
+        data: {
+          gpt: response,
+        },
+        where: {
+          userid: ctx.from.id.toString(),
+        },
+      });
 
-  await ctx.reply("GPT changed!");
+      await ctx.reply(`GPT changed to  GPT4`);
+    }
+  } catch (e) {
+    console.log(e);
+    await ctx.reply(`We don't have any record of you. run /start.`);
+  }
 });
 
 bot.hears("/settings", async (ctx) => {
@@ -475,23 +480,41 @@ bot.action(/back-\d+/, async (ctx) => {
   let data = ctx.match[0].split("-")[1];
   // const data = ctx.match[1].split("-")[1];
   console.log("back", data);
-
   let profiles = config.profiles.slice(data, data + 5);
 
   let keyboard = [];
+
+  if (data == 0) {
+    keyboard.push([
+      {
+        text: "Dalle(Image Generation)",
+        callback_data: "ImageGenerationMode",
+      },
+    ]);
+    keyboard.push([
+      {
+        text: "VoiceGPT(audio message prompt)",
+        callback_data: "VoiceGPT",
+      },
+    ]);
+  }
   for (let el of profiles) {
-    console.log(el);
+    // console.log(el);
     keyboard.push([{ text: el.name, callback_data: el.name }]);
   }
   const newLoc = parseInt(data) + 5;
-
+  if (parseInt(data - 5) >= 0) {
+    keyboard.push([
+      { text: "Back", callback_data: "back-" + parseInt(data - 5) },
+    ]);
+  }
   try {
     await ctx.editMessageReplyMarkup(
       Markup.inlineKeyboard([
         ...keyboard,
         [
           // { text: "Back", callback_data: "next-" + toString(currentIndex - 5) },
-          { text: "Back", callback_data: "back-" + parseInt(data - 5) },
+
           { text: "Next", callback_data: "next-" + parseInt(newLoc) },
         ],
         [{ text: "Back to menu", callback_data: "BackMenu" }],
@@ -501,19 +524,21 @@ bot.action(/back-\d+/, async (ctx) => {
 });
 bot.action(/next-\d+/, async (ctx) => {
   let data = ctx.match[0].split("-")[1];
-  // const data = ctx.match[1].split("-")[1];
-  // console.log(data);
+  console.log("next", data);
 
-  let profiles = config.profiles.slice(data, data + 5);
+  let sliceValue = data;
+  if (data == 0) sliceValue += 5;
+  let profiles = config.profiles.slice(sliceValue, sliceValue + 5);
 
   let keyboard = [];
   for (let el of profiles) {
-    console.log(el);
+    // console.log(el);
     keyboard.push([{ text: el.name, callback_data: el.name }]);
   }
-  const newLoc = parseInt(data) + 5;
+  let newLoc = parseInt(data) + 5;
 
-  console.log(config.profiles.length, newLoc);
+  // if (data == 5) newLoc += 5;
+  // console.log(config.profiles.length, newLoc);
 
   if (newLoc < config.profiles.length)
     keyboard.push([
@@ -534,7 +559,7 @@ bot.action(/next-\d+/, async (ctx) => {
 });
 bot.action("BackMenu", async (ctx) => {
   await ctx.editMessageText(
-    `🫂 Subscribe to our channel to get latest bot updates: @MindAIProject
+    `🫂 Subscribe to our channel to get latest bot updates
 
         🏠 Menu:`
   );
@@ -544,7 +569,7 @@ bot.action("BackMenu", async (ctx) => {
       [{ text: "Dialog History", callback_data: "Dialog-0" }],
       // [{ text: "Get Free Tokens", callback_data: "FreeTokens" }],
       // [{ text: "Gift Tokens", callback_data: "GiftToken" }],
-      // [{ text: "Balance(Subscription)", callback_data: "Balance" }],
+      [{ text: "Balance(Subscription)", callback_data: "Balance" }],
       [
         { text: "Settings", callback_data: "settings" },
         { text: "Help", callback_data: "Help" },
@@ -607,7 +632,8 @@ bot.on("text", async (ctx) => {
   }
 
   // let chance = GibberishDetector.detect(ctx.message.text);
-  // if (chance > 70) {
+  // console.log(chance);
+  // if (chance > 80) {
   //   await ctx.reply(
   //     "It looks like you misspelled something or your message does not have any specific message..\nfeel free to ask specific question. "
   //   );
@@ -634,20 +660,25 @@ bot.on("text", async (ctx) => {
   }
   if (data.chatMode == "ImageGenerationMode") {
     await ctx.reply("Please wait.. Image is being generated.");
-    const response = await openai.images.generate({
-      model: "dall-e-3",
-      prompt: ctx.message.text,
-      size: "1024x1024",
-      quality: "standard",
-      n: 1,
-    });
+    try {
+      const response = await openai.images.generate({
+        model: "dall-e-3",
+        prompt: ctx.message.text,
+        size: "1024x1024",
+        quality: "standard",
+        n: 1,
+      });
 
-    // console.log(response);
-    image_url = response.data[0].url;
-    // console.log(image_url);
+      // console.log(response);
+      image_url = response.data[0].url;
+      // console.log(image_url);
 
-    await ctx.sendPhoto(image_url);
-    return;
+      await ctx.sendPhoto(image_url);
+      return;
+    } catch (e) {
+      await ctx.reply(`Invalid prompt`);
+      return;
+    }
   }
   const interaction = await prisma.interaction.findFirst({
     where: {
@@ -686,23 +717,28 @@ bot.on("text", async (ctx) => {
   // }
   // console.log(desc);
   const el = { name: data["chatMode"], desc: desc.desc };
-
+  console.log(el);
   try {
-    bot.context.chats[ctx.from.id.toString()].push(`You : ${ctx.message.text}`);
+    bot.context.chats[ctx.from.id.toString()].push(
+      `You : ${ctx.message.text}\n`
+    );
   } catch (e) {
+    console.log(e);
     bot.context.chats[ctx.from.id.toString()] = [];
-    bot.context.chats[ctx.from.id.toString()].push(`You : ${ctx.message.text}`);
+    bot.context.chats[ctx.from.id.toString()].push(
+      `You : ${ctx.message.text}\n`
+    );
   }
   const prompt = `I want you to act like you are in  ${
     el.name
   }. here is the description for your mode and reply as per your descripton without mentioned that your are an ai:
   description : ${el.desc},
-
+  word limit : 10-100 word,
   prompt : ${bot.context.chats[ctx.from.id.toString()].join()}`;
-  // console.log(prompt);
+  console.log(prompt);
 
   let message = await ctx.reply("...");
-  // console.log(settings.gpt);
+  console.log(settings.gpt);
   const stream = await openai.chat.completions.create({
     model: settings.gpt,
     messages: [{ role: "user", content: prompt }],
@@ -714,23 +750,44 @@ bot.on("text", async (ctx) => {
     if (
       chunk.choices[0]?.delta?.content == null ||
       chunk.choices[0]?.delta?.content == ""
-    )
+    ) {
+      console.log("sometthing");
+      // continue;
+      console.log(chunk.choices[0]?.delta?.content);
+
+      // response = "";
       continue;
+    }
 
-    const newText = chunk.choices[0]?.delta?.content || "";
-    response += newText;
-
-    if (message.text != response) {
-      try {
+    try {
+      if (response != "" && response != null && response.length % 3 == 0)
         await bot.telegram.editMessageText(
           message.chat.id,
           message.message_id,
           undefined,
           response
         );
-      } catch (e) {}
+    } catch (e) {
+      console.log(e);
     }
+    const newText = chunk.choices[0]?.delta?.content || "";
+    response += newText;
   }
+
+  if (
+    response.length % 7 == 0 ||
+    response.length % 5 == 0
+    // response.length % 2 ==
+  ) {
+    await bot.telegram.editMessageText(
+      message.chat.id,
+      message.message_id,
+      undefined,
+      response
+    );
+  }
+
+  console.log(response);
   try {
     bot.context.chats[ctx.from.id.toString()].push(`AI : ${response}`);
     await prisma.chat.create({

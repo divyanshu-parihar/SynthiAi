@@ -1,6 +1,6 @@
 async function menu(ctx) {
   await ctx.reply(
-    `🫂 Subscribe to our channel to get latest bot updates: @MindAIProject
+    `🫂 Subscribe to our channel to get latest bot updates: 
     
         🏠 Menu:`,
     {
