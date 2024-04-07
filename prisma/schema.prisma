@@ -55,10 +55,37 @@ model currentAssitant {
 
 model userPurchasedToken {
   id     Int    @id @unique @default(autoincrement())
-  userid String
-  token  Int
+  userid String @unique
+  token  Int    @default(10000)
 }
 
 model Subscription {
-  id Int @id @unique @default(autoincrement())
+  id     Int       @id @unique @default(autoincrement())
+  userid String    @unique
+  status SubStatus @default(wait_accept)
+}
+
+model userOrders {
+  id      Int    @id @default(autoincrement())
+  userid  String
+  orderid String @unique
+}
+
+enum SubStatus {
+  wait_accept
+  cancel_by_merchant
+  active
+  cancel_by_user
+}
+
+enum Status {
+  confirm_check
+  paid
+  paid_over
+  wrong_amount
+  cancel
+  system_fail
+  refund_process
+  refund_fail
+  refund_paid
 }

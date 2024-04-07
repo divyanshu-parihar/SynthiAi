@@ -97,6 +97,8 @@ async function start(ctx, bot) {
   } catch (e) {
     console.log("user already has settings");
   }
+
+  // console.log(await prisma.userPurchasedToken.findMany());
   await ctx.reply(
     'Your dialog "🧠 Hello" is saved to 🗂️ Dialog History. You can continue it anytime with /menu command'
   );
