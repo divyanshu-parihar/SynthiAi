@@ -180,6 +180,35 @@ bot.on("voice", async (ctx) => {
         } catch (e) {}
       }
     }
+    try {
+      const user = ctx.from.id.toString();
+
+      const dataPoint = await prisma.userPurchasedToken.findUnique({
+        where: { userid: user },
+      });
+
+      if (!dataPoint) {
+        throw new Error("Data point not found");
+      }
+
+      // Calculate the new value
+      const currentValue = dataPoint.token;
+      const newValue =
+        currentValue - transcription.text.length / 4 - response.length / 4;
+
+      console.log(newValue);
+      // Update the database with the new value
+      await prisma.userPurchasedToken.update({
+        where: { userid: user },
+        data: {
+          token: parseInt(newValue),
+        },
+      });
+      // }
+    } catch (e) {
+      console.log("error happened for ", data);
+      console.log(e);
+    }
   });
 });
 bot.start(async (ctx) => {
