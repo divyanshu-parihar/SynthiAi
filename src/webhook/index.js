@@ -6,6 +6,10 @@ const { prisma } = require("../handler/database");
 app.use(express.json());
 // const { PrismaClient } = require("@prisma/client");
 // const prisma = new PrismaClient();
+
+app.get("/", (req, res) => {
+  res.send("Hello from webhook");
+});
 app.post("/webhook", async (req, res) => {
   // const data = prisma.userPurchasedToken.findMany();
 
