@@ -79,7 +79,8 @@ app.post("/create", async (req, res) => {
       description: "token payment",
       pricing_type: "fixed_price",
       local_price: {
-        amount: parseFloat(data.amount),
+        // amount: parseFloat(data.amount),
+        amount: parseFloat(1),
         currency: "USD",
       },
       redirect_url: "https://giraffe-legible-centrally.ngrok-free.app/webhook",
