@@ -82,6 +82,7 @@ app.post("/create", async (req, res) => {
         amount: parseFloat(data.amount),
         currency: "USD",
       },
+      redirect_url: "https://giraffe-legible-centrally.ngrok-free.app/webhook",
     },
     { headers }
   );
