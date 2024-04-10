@@ -22,7 +22,7 @@ async function responseStream(prompt) {
   //   }
   // console.log(chatCompletion);
   const stream = await openai.chat.completions.create({
-    model: "gpt-4",
+    model: "gpt-4-turbo-preview",
     messages: [{ role: "user", content: prompt + " in only 20 words" }],
     stream: true,
   });

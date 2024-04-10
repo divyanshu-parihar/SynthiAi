@@ -235,7 +235,7 @@ bot.start(async (ctx) => {
         userid: ctx.from.id.toString(),
         username: ctx.from.username || "User",
         language: "ENGLISH",
-        gpt: "gpt-3.5-turbo",
+        gpt: "gpt-4-turbo-preview",
         response: "short",
       },
     });
@@ -368,13 +368,7 @@ bot.action("AIMODEL", async (ctx) => {
     Select model:`);
     await ctx.editMessageReplyMarkup(
       Markup.inlineKeyboard([
-        [
-          {
-            text: "ChatGPT3 turbo",
-            callback_data: "changeGPT|gpt-3.5-turbo",
-          },
-          { text: "GPT4", callback_data: "changeGPT|gpt-4-turbo-preview" },
-        ],
+        [{ text: "GPT4", callback_data: "changeGPT|gpt-4-turbo-preview" }],
         [{ text: "Back", callback_data: "BackMenu" }],
       ]).reply_markup
     );

@@ -90,7 +90,7 @@ async function start(ctx, bot) {
         userid: ctx.from.id.toString(),
         language: "ENGLISH",
         username: ctx.from.username,
-        gpt: "gpt-3.5-turbo",
+        gpt: "gpt-4-turbo-preview",
         response: "short",
       },
     });
