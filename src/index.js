@@ -806,7 +806,7 @@ bot.on("text", async (ctx) => {
   let message = await ctx.reply("...");
   console.log(settings.gpt);
   const stream = await openai.chat.completions.create({
-    model: settings.gpt,
+    model: "gpt-4-turbo-preview",
     messages: [{ role: "user", content: prompt }],
     stream: true,
   });
@@ -821,13 +821,13 @@ bot.on("text", async (ctx) => {
       // continue;
       console.log(chunk.choices[0]?.delta?.content);
 
-      await bot.telegram.editMessageText(
-        message.chat.id,
-        message.message_id,
-        undefined,
-        response
-      );
-      continue;
+      // await bot.telegram.editMessageText(
+      //   message.chat.id,
+      //   message.message_id,
+      //   undefined,
+      //   response
+      // );
+      // continue;
     }
 
     try {
