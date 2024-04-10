@@ -804,7 +804,7 @@ bot.on("text", async (ctx) => {
   console.log(prompt);
 
   let message = await ctx.reply("...");
-  console.log(settings.gpt);
+  // console.log(settings.gpt);
   const stream = await openai.chat.completions.create({
     model: "gpt-4-turbo-preview",
     messages: [{ role: "user", content: prompt }],
@@ -827,35 +827,24 @@ bot.on("text", async (ctx) => {
       //   undefined,
       //   response
       // );
-      // continue;
+      continue;
     }
 
-    try {
-      if (response != "" && response != null)
-        await bot.telegram.editMessageText(
-          message.chat.id,
-          message.message_id,
-          undefined,
-          response
-        );
-    } catch (e) {
-      console.log(e);
-    }
     const newText = chunk.choices[0]?.delta?.content || "";
     response += newText;
-  }
 
-  if (
-    response.length % 7 == 0 ||
-    response.length % 5 == 0
-    // response.length % 2 ==
-  ) {
-    await bot.telegram.editMessageText(
-      message.chat.id,
-      message.message_id,
-      undefined,
-      response
-    );
+    if (
+      response.length % 7 == 0 ||
+      response.length % 5 == 0
+      // response.length % 2 ==
+    ) {
+      await bot.telegram.editMessageText(
+        message.chat.id,
+        message.message_id,
+        undefined,
+        response
+      );
+    }
   }
 
   console.log(response);
