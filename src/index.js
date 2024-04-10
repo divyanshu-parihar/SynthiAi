@@ -827,12 +827,17 @@ bot.on("text", async (ctx) => {
       // continue;
       console.log(chunk.choices[0]?.delta?.content);
 
-      // response = "";
+      await bot.telegram.editMessageText(
+        message.chat.id,
+        message.message_id,
+        undefined,
+        response
+      );
       continue;
     }
 
     try {
-      if (response != "" && response != null && response.length % 3 == 0)
+      if (response != "" && response != null)
         await bot.telegram.editMessageText(
           message.chat.id,
           message.message_id,
