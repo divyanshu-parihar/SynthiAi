@@ -90,13 +90,15 @@ async function start(ctx, bot) {
         userid: ctx.from.id.toString(),
         language: "ENGLISH",
         username: ctx.from.username,
-        gpt: "gpt-3.5-turbo",
+        gpt: "gpt-4-turbo-preview",
         response: "short",
       },
     });
   } catch (e) {
     console.log("user already has settings");
   }
+
+  // console.log(await prisma.userPurchasedToken.findMany());
   await ctx.reply(
     'Your dialog "🧠 Hello" is saved to 🗂️ Dialog History. You can continue it anytime with /menu command'
   );

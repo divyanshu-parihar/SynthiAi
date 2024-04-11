@@ -1,5 +1,5 @@
 module.exports = {
-  gpts: ["gpt-3.5-turbo", "gpt-4-turbo-preview"],
+  gpts: ["gpt-4-turbo-preview"],
   profiles: [
     {
       name: "Assistant",

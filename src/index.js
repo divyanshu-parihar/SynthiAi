@@ -18,7 +18,6 @@ const {
 } = require("./events");
 const config = require("./config");
 const { prisma } = require("./handler/database");
-
 const store = SQLite({
   filename: "./telegraf-sessions.sqlite",
 });
@@ -181,6 +180,35 @@ bot.on("voice", async (ctx) => {
         } catch (e) {}
       }
     }
+    try {
+      const user = ctx.from.id.toString();
+
+      const dataPoint = await prisma.userPurchasedToken.findUnique({
+        where: { userid: user },
+      });
+
+      if (!dataPoint) {
+        throw new Error("Data point not found");
+      }
+
+      // Calculate the new value
+      const currentValue = dataPoint.token;
+      const newValue =
+        currentValue - transcription.text.length / 4 - response.length / 4;
+
+      console.log(newValue);
+      // Update the database with the new value
+      await prisma.userPurchasedToken.update({
+        where: { userid: user },
+        data: {
+          token: parseInt(newValue),
+        },
+      });
+      // }
+    } catch (e) {
+      console.log("error happened for ", data);
+      console.log(e);
+    }
   });
 });
 bot.start(async (ctx) => {
@@ -207,10 +235,28 @@ bot.start(async (ctx) => {
         userid: ctx.from.id.toString(),
         username: ctx.from.username || "User",
         language: "ENGLISH",
-        gpt: "gpt-3.5-turbo",
+        gpt: "gpt-4-turbo-preview",
         response: "short",
       },
     });
+  } catch (e) {
+    console.log(e);
+  }
+  try {
+    const tokens = await prisma.userPurchasedToken.findFirst({
+      where: {
+        userid: ctx.from.id.toString(),
+      },
+    });
+    console.log(tokens);
+    if (!tokens) {
+      await prisma.userPurchasedToken.create({
+        data: {
+          userid: ctx.from.id.toString(),
+          token: 10000,
+        },
+      });
+    }
   } catch (e) {
     console.log(e);
   }
@@ -322,13 +368,7 @@ bot.action("AIMODEL", async (ctx) => {
     Select model:`);
     await ctx.editMessageReplyMarkup(
       Markup.inlineKeyboard([
-        [
-          {
-            text: "ChatGPT3 turbo",
-            callback_data: "changeGPT|gpt-3.5-turbo",
-          },
-          { text: "GPT4", callback_data: "changeGPT|gpt-4-turbo-preview" },
-        ],
+        [{ text: "GPT4", callback_data: "changeGPT|gpt-4-turbo-preview" }],
         [{ text: "Back", callback_data: "BackMenu" }],
       ]).reply_markup
     );
@@ -388,6 +428,7 @@ bot.hears("/settings", async (ctx) => {
           //   { text: "Detailed Model", callback_data: "Response-detailed" },
           // ],
           [{ text: "AI Model", callback_data: "AIMODEL" }],
+          [{ text: "Purchase", callback_data: "purchase" }],
           [{ text: "Back to menu", callback_data: "BackMenu" }],
         ],
       },
@@ -407,12 +448,9 @@ bot.action("settings", async (ctx) => {
             callback_data: "changeUsername",
           },
         ],
-
-        // [
-        //   { text: "Short Response", callback_data: "Response-short" },
-        //   { text: "Detailed Model", callback_data: "Response-detailed" },
-        // ],
+        // [{text: "Tokens",callback_da}]
         [{ text: "AI Model", callback_data: "AIMODEL" }],
+        [{ text: "Purchase", callback_data: "purchase" }],
         [{ text: "Back to menu", callback_data: "BackMenu" }],
       ]).reply_markup
     );
@@ -420,7 +458,19 @@ bot.action("settings", async (ctx) => {
     console.log(e);
   }
 });
-
+bot.action("purchase", async (ctx) => {
+  await ctx.reply("Payment Link is being generated for 50USD");
+  const data = await axios.post(
+    "http://localhost:3000/create",
+    {
+      userid: ctx.from.id.toString(),
+      amount: 50,
+    },
+    { "Content-Type": "application/json", "User-Agent": "insomnia/8.6.1" }
+  );
+  console.log(data);
+  await ctx.reply(data.data.url);
+});
 bot.action(/^Response-\w+/, async (ctx) => {
   const text = ctx.match[0].split("-")[1];
   try {
@@ -522,6 +572,22 @@ bot.action(/back-\d+/, async (ctx) => {
     );
   } catch (e) {}
 });
+
+bot.action("Balance", async (ctx) => {
+  console.log("balance");
+  try {
+    const data = await prisma.userPurchasedToken.findFirst({
+      where: {
+        userid: ctx.from.id.toString(),
+      },
+    });
+    console.log(data.token);
+
+    await ctx.reply("Your Balance " + data.token);
+  } catch (e) {
+    console.log(e);
+  }
+});
 bot.action(/next-\d+/, async (ctx) => {
   let data = ctx.match[0].split("-")[1];
   console.log("next", data);
@@ -569,7 +635,7 @@ bot.action("BackMenu", async (ctx) => {
       [{ text: "Dialog History", callback_data: "Dialog-0" }],
       // [{ text: "Get Free Tokens", callback_data: "FreeTokens" }],
       // [{ text: "Gift Tokens", callback_data: "GiftToken" }],
-      [{ text: "Balance(Subscription)", callback_data: "Balance" }],
+      [{ text: "Balance", callback_data: "Balance" }],
       [
         { text: "Settings", callback_data: "settings" },
         { text: "Help", callback_data: "Help" },
@@ -738,9 +804,9 @@ bot.on("text", async (ctx) => {
   console.log(prompt);
 
   let message = await ctx.reply("...");
-  console.log(settings.gpt);
+  // console.log(settings.gpt);
   const stream = await openai.chat.completions.create({
-    model: settings.gpt,
+    model: "gpt-4-turbo-preview",
     messages: [{ role: "user", content: prompt }],
     stream: true,
   });
@@ -755,36 +821,30 @@ bot.on("text", async (ctx) => {
       // continue;
       console.log(chunk.choices[0]?.delta?.content);
 
-      // response = "";
+      // await bot.telegram.editMessageText(
+      //   message.chat.id,
+      //   message.message_id,
+      //   undefined,
+      //   response
+      // );
       continue;
     }
 
-    try {
-      if (response != "" && response != null && response.length % 3 == 0)
-        await bot.telegram.editMessageText(
-          message.chat.id,
-          message.message_id,
-          undefined,
-          response
-        );
-    } catch (e) {
-      console.log(e);
-    }
     const newText = chunk.choices[0]?.delta?.content || "";
     response += newText;
-  }
 
-  if (
-    response.length % 7 == 0 ||
-    response.length % 5 == 0
-    // response.length % 2 ==
-  ) {
-    await bot.telegram.editMessageText(
-      message.chat.id,
-      message.message_id,
-      undefined,
-      response
-    );
+    if (
+      response.length % 7 == 0 ||
+      response.length % 5 == 0
+      // response.length % 2 ==
+    ) {
+      await bot.telegram.editMessageText(
+        message.chat.id,
+        message.message_id,
+        undefined,
+        response
+      );
+    }
   }
 
   console.log(response);
@@ -802,7 +862,38 @@ bot.on("text", async (ctx) => {
     console.log(e);
     console.log("failed to save chat");
   }
+  console.log("here");
+  try {
+    const user = ctx.from.id.toString();
+
+    const dataPoint = await prisma.userPurchasedToken.findUnique({
+      where: { userid: user },
+    });
+
+    if (!dataPoint) {
+      throw new Error("Data point not found");
+    }
+
+    // Calculate the new value
+    const currentValue = dataPoint.token;
+    const newValue =
+      currentValue - ctx.message.text.length / 4 - response.length / 4;
+
+    console.log(newValue);
+    // Update the database with the new value
+    await prisma.userPurchasedToken.update({
+      where: { userid: user },
+      data: {
+        token: parseInt(newValue),
+      },
+    });
+    // }
+  } catch (e) {
+    console.log("error happened for ", data);
+    console.log(e);
+  }
 });
+
 async function main() {
   console.log("Starting the bot...");
   bot.launch();
@@ -812,5 +903,4 @@ try {
 } catch (e) {
   console.log(e);
 }
-
 module.exports = { bot };
