@@ -847,6 +847,13 @@ bot.on("text", async (ctx) => {
     }
   }
 
+  await bot.telegram.editMessageText(
+    message.chat.id,
+    message.message_id,
+    undefined,
+    response
+  );
+
   console.log(response);
   try {
     bot.context.chats[ctx.from.id.toString()].push(`AI : ${response}`);
