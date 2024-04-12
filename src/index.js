@@ -877,7 +877,7 @@ bot.on("text", async (ctx) => {
       response
     );
   } else {
-    const noOfedits = 5;
+    const noOfedits = 7;
     let length = response.length;
 
     // Calculate the approximate length of each segment
