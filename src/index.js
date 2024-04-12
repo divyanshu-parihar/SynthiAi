@@ -697,6 +697,17 @@ bot.on("text", async (ctx) => {
     return;
   }
 
+  const dataPoint = await prisma.userPurchasedToken.findUnique({
+    where: { userid: ctx.from.id.toString() },
+  });
+
+  if (!dataPoint) {
+    // throw new Error("Data point not found");
+    return await ctx.reply(
+      "You don't have a token wallet, Please create one with /start."
+    );
+  }
+
   // let chance = GibberishDetector.detect(ctx.message.text);
   // console.log(chance);
   // if (chance > 80) {
@@ -805,47 +816,48 @@ bot.on("text", async (ctx) => {
 
   let message = await ctx.reply("...");
   // console.log(settings.gpt);
-  const stream = await openai.chat.completions.create({
+  let response = await openai.chat.completions.create({
     model: "gpt-4-turbo-preview",
     messages: [{ role: "user", content: prompt }],
-    stream: true,
+    // stream: true,
   });
-  let response = "";
 
-  for await (const chunk of stream) {
-    if (
-      chunk.choices[0]?.delta?.content == null ||
-      chunk.choices[0]?.delta?.content == ""
-    ) {
-      console.log("sometthing");
-      // continue;
-      console.log(chunk.choices[0]?.delta?.content);
+  const tokens_used = response.usage.total_tokens;
+  // let response = "";
 
-      // await bot.telegram.editMessageText(
-      //   message.chat.id,
-      //   message.message_id,
-      //   undefined,
-      //   response
-      // );
-      continue;
-    }
+  // for await (const chunk of stream) {
+  //   if (
+  //     chunk.choices[0]?.delta?.content == null ||
+  //     chunk.choices[0]?.delta?.content == ""
+  //   ) {
+  //     // continue;
+  //     console.log(chunk.choices[0]?.delta?.content);
 
-    const newText = chunk.choices[0]?.delta?.content || "";
-    response += newText;
+  //     // await bot.telegram.editMessageText(
+  //     //   message.chat.id,
+  //     //   message.message_id,
+  //     //   undefined,
+  //     //   response
+  //     // );
+  //     continue;
+  //   }
 
-    if (
-      response.length % 7 == 0 ||
-      response.length % 2 == 0
-      // response.length % 2 ==
-    ) {
-      await bot.telegram.editMessageText(
-        message.chat.id,
-        message.message_id,
-        undefined,
-        response
-      );
-    }
-  }
+  //   const newText = chunk.choices[0]?.delta?.content || "";
+  //   response += newText;
+
+  //   // if (
+  //   //   response.length % 7 == 0 ||
+  //   //   response.length % 2 == 0
+  //   //   // response.length % 2 ==
+  //   // ) {
+  //   //   await bot.telegram.editMessageText(
+  //   //     message.chat.id,
+  //   //     message.message_id,
+  //   //     undefined,
+  //   //     response
+  //   //   );
+  //   // }
+  // }
 
   // await bot.telegram.editMessageText(
   //   message.chat.id,
@@ -853,6 +865,49 @@ bot.on("text", async (ctx) => {
   //   undefined,
   //   response
   // );
+  console.log(response);
+  console.log(response.choices[0].message);
+
+  response = response.choices[0].message.content;
+  if (response.length < 40) {
+    await bot.telegram.editMessageText(
+      message.chat.id,
+      message.message_id,
+      undefined,
+      response
+    );
+  } else {
+    const noOfedits = 5;
+    let length = response.length;
+
+    // Calculate the approximate length of each segment
+    let segment_length = Math.floor(length / noOfedits);
+
+    // Extract each segment of the string
+    let segment1 = response.substring(0, segment_length);
+    let segment2 = response.substring(segment_length, 2 * segment_length);
+    let segment3 = response.substring(2 * segment_length);
+
+    // doing the below craziness just to make sure the client is satified
+    await bot.telegram.editMessageText(
+      message.chat.id,
+      message.message_id,
+      undefined,
+      segment1
+    );
+    await bot.telegram.editMessageText(
+      message.chat.id,
+      message.message_id,
+      undefined,
+      segment1 + segment2
+    );
+    await bot.telegram.editMessageText(
+      message.chat.id,
+      message.message_id,
+      undefined,
+      segment1 + segment2 + segment3
+    );
+  }
 
   console.log(response);
   try {
@@ -873,18 +928,9 @@ bot.on("text", async (ctx) => {
   try {
     const user = ctx.from.id.toString();
 
-    const dataPoint = await prisma.userPurchasedToken.findUnique({
-      where: { userid: user },
-    });
-
-    if (!dataPoint) {
-      throw new Error("Data point not found");
-    }
-
     // Calculate the new value
     const currentValue = dataPoint.token;
-    const newValue =
-      currentValue - ctx.message.text.length / 4 - response.length / 4;
+    const newValue = currentValue - tokens_used;
 
     console.log(newValue);
     // Update the database with the new value
