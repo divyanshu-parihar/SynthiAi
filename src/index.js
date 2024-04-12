@@ -835,7 +835,7 @@ bot.on("text", async (ctx) => {
 
     if (
       response.length % 7 == 0 ||
-      response.length % 5 == 0
+      response.length % 2 == 0
       // response.length % 2 ==
     ) {
       await bot.telegram.editMessageText(
@@ -847,12 +847,12 @@ bot.on("text", async (ctx) => {
     }
   }
 
-  await bot.telegram.editMessageText(
-    message.chat.id,
-    message.message_id,
-    undefined,
-    response
-  );
+  // await bot.telegram.editMessageText(
+  //   message.chat.id,
+  //   message.message_id,
+  //   undefined,
+  //   response
+  // );
 
   console.log(response);
   try {
