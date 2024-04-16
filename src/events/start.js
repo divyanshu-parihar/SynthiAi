@@ -70,7 +70,7 @@ async function start(ctx, bot) {
   if (row) {
     await prisma.currentAssitant.update({
       data: {
-        chatMode: "Assistant",
+        chatMode: " 👨‍💼 Assistant",
       },
       where: {
         userid: userId,
@@ -80,7 +80,7 @@ async function start(ctx, bot) {
     await prisma.currentAssitant.create({
       data: {
         userid: userId,
-        chatMode: "Assistant",
+        chatMode: " 👨‍💼 Assistant",
       },
     });
   }
