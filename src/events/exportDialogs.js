@@ -71,7 +71,14 @@ async function exportDialogs(ctx) {
     writeStream.write(header);
 
     chats.forEach((row) => {
-      let values = row.prompt.split("prompt :")[1] + "\t" + row.response + "\n";
+      const segments = row.prompt.split(",You : ");
+
+      // Get the last segment
+      const lastYouSegment = segments[segments.length - 1];
+
+      // Extract the value after "You : "
+      const valueOfLastYou = lastYouSegment.split("You : ")[1];
+      let values = valueOfLastYou + "\t" + row.response + "\n";
       writeStream.write(values);
     });
     // chats
