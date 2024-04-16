@@ -416,7 +416,51 @@ bot.action("Help", async (ctx) => {
 
   Commands:
   ⚪ /menu – Menu
-  ⚪ /new – Start new interaction\\(*required\\) 
+  ⚪ /new – Start new interaction\\(\\*required\\) 
+  ⚪ /settings – Show settings
+  
+  🧠 GPT\\-4 Turbo is available 
+  🎨 Image Generation mode is live
+  🎤 Voice Messages can be used
+  
+  Key Points to Remember:
+  \\- Your conversation's length directly influences token consumption; shorter dialogs save tokens
+  \\- Restart the conversation using the /new command
+  \\- Utilize English \\(🇬🇧\\) for enhanced response quality
+  
+  The GPT\\-4 Turbo mode uses ten times the tokens compared to ChatGPT\\.
+  👩🏼‍💻 Support: @marcus\\_xei \\- Lead Synthi Architect
+  📜 [More details in our page](https://xei.gitbook.io/documentation/utility/synthi-ai-assistant) \\. 
+  `);
+});
+bot.hears("/help", async (ctx) => {
+  await ctx.replyWithMarkdownV2(`I'm Synthi AI 🤖
+
+  Commands:
+  ⚪ /menu – Menu
+  ⚪ /new – Start new interation\\(\\*required\\) 
+  ⚪ /settings – Show settings
+  
+  🧠 GPT\\-4 Turbo is available 
+  🎨 Image Generation mode is live
+  🎤 Voice Messages can be used
+  
+  Key Points to Remember:
+  \\- Your conversation's length directly influences token consumption; shorter dialogs save tokens
+  \\- Restart the conversation using the /new command
+  \\- Utilize English \\(🇬🇧\\) for enhanced response quality
+  
+  The GPT\\-4 Turbo mode uses ten times the tokens compared to ChatGPT\\.
+  👩🏼‍💻 Support: @marcus\\_xei \\- Lead Synthi Architect
+  📜 [More details in our page](https://xei.gitbook.io/documentation/utility/synthi-ai-assistant) \\. 
+  `);
+});
+bot.hears("/help", async (ctx) => {
+  await ctx.replyWithMarkdownV2(`I'm Synthi AI 🤖
+
+  Commands:
+  ⚪ /menu – Menu
+  ⚪ /new – Start new interation\\(required\\) 
   ⚪ /settings – Show settings
   
   🧠 GPT\\-4 Turbo is available 
