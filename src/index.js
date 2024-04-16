@@ -33,6 +33,114 @@ const bot = new Telegraf(process.env.BOT_TOKEN, {});
 bot.context.chats = {};
 
 bot.use(session({ store }));
+bot.action("comming_soon", async (ctx) => {
+  await ctx.editMessageText(" comming soon: ");
+
+  await ctx.editMessageReplyMarkup(
+    Markup.inlineKeyboard([
+      [
+        {
+          text: "RAG Support for Document Queries",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Expanded Options for Text Models Including Llama, GPT-3, GPT-4, and Mistral",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "System Status Monitoring for CPU and GPU Usage",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Enhanced Image Model Options: Stable Diffusion, Playground AI, DALLE",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Text-to-Voice Capabilities Using Hume AI (Beta)",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Fast and Accurate Speech-to-Text with Whisper Model",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Multilingual Support with Google Translate API",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Integration of Image Recognition Features",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Text-to-Video Generation Capabilities",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Multi-platform Integration with Messaging Platforms",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Personalization Based on User Preferences and History",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Advanced Natural Language Understanding for Better Query Interpretation",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Emotional Intelligence Through Sentiment Analysis",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Adaptive Learning from User Interactions and Feedback",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Proactive Assistance by Anticipating User Needs",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Text-to-Website Generation (beta)",
+          callback_data: "soon",
+        },
+      ],
+      [{ text: "Back", callback_data: "BackMenu" }],
+    ]).reply_markup
+  );
+});
+bot.action("soon", async (ctx) => {
+  await ctx.reply("currently in the development");
+});
 bot.action("portal", async (ctx) => {
   await ctx.editMessageText("XEI Portal: ");
   await ctx.editMessageReplyMarkup(
@@ -86,6 +194,7 @@ bot.action("portal", async (ctx) => {
     ]).reply_markup
   );
 });
+
 const changeMode = async (ctx, index) => {
   currentIndex = index;
   let profiles = config.profiles.slice(currentIndex, currentIndex + 5);
@@ -667,16 +776,16 @@ bot.action(/next-\d+/, async (ctx) => {
 });
 bot.action("BackMenu", async (ctx) => {
   await ctx.editMessageText(
-    `🫂 Subscribe to our channel to get latest bot updates
-
-        🏠 Menu:`
+    `
+    Subscribe to our Synthi AI Official Channel
+    
+    https://t.me/synthi_ai`
   );
   await ctx.editMessageReplyMarkup(
     Markup.inlineKeyboard([
       [{ text: "Select Chat Mode", callback_data: "SelectChat" }],
+      [{ text: "Coming Soon", callback_data: "comming_soon" }],
       [{ text: "Dialog History", callback_data: "Dialog-0" }],
-      // [{ text: "Get Free Tokens", callback_data: "FreeTokens" }],
-      // [{ text: "Gift Tokens", callback_data: "GiftToken" }],
       [{ text: "Balance", callback_data: "Balance" }],
       [
         { text: "Settings", callback_data: "settings" },

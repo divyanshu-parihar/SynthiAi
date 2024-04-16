@@ -7,6 +7,7 @@ async function menu(ctx) {
         inline_keyboard: [
           /* Inline buttons. 2 side-by-side */
           [{ text: "Select Chat Mode", callback_data: "SelectChat" }],
+          [{ text: "Coming Soon", callback_data: "comming_soon" }],
           [{ text: "Dialog History", callback_data: "Dialog-0" }],
           // [{ text: "Get Free Tokens", callback_data: "FreeTokens" }],
           // [{ text: "Gift Tokens", callback_data: "GiftToken" }],
