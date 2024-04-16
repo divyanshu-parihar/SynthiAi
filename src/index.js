@@ -33,17 +33,168 @@ const bot = new Telegraf(process.env.BOT_TOKEN, {});
 bot.context.chats = {};
 
 bot.use(session({ store }));
+bot.action("comming_soon", async (ctx) => {
+  await ctx.editMessageText(" comming soon: ");
+
+  await ctx.editMessageReplyMarkup(
+    Markup.inlineKeyboard([
+      [
+        {
+          text: "RAG Support for Document Queries",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Expanded Options for Text Models Including Llama, GPT-3, GPT-4, and Mistral",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "System Status Monitoring for CPU and GPU Usage",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Enhanced Image Model Options: Stable Diffusion, Playground AI, DALLE",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Text-to-Voice Capabilities Using Hume AI (Beta)",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Fast and Accurate Speech-to-Text with Whisper Model",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Multilingual Support with Google Translate API",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Integration of Image Recognition Features",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Text-to-Video Generation Capabilities",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Multi-platform Integration with Messaging Platforms",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Personalization Based on User Preferences and History",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Advanced Natural Language Understanding for Better Query Interpretation",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Emotional Intelligence Through Sentiment Analysis",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Adaptive Learning from User Interactions and Feedback",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Proactive Assistance by Anticipating User Needs",
+          callback_data: "soon",
+        },
+      ],
+      [
+        {
+          text: "Text-to-Website Generation (beta)",
+          callback_data: "soon",
+        },
+      ],
+      [{ text: "Back", callback_data: "BackMenu" }],
+    ]).reply_markup
+  );
+});
+bot.action("soon", async (ctx) => {
+  await ctx.reply("currently in the development");
+});
 bot.action("portal", async (ctx) => {
   await ctx.editMessageText("XEI Portal: ");
   await ctx.editMessageReplyMarkup(
     Markup.inlineKeyboard([
       [{ text: "X", url: "https://x.com/xei_official" }],
-      [{ text: "website", url: "https://www.xei.ai" }],
-      [{ text: "whitepaper", url: "https://xei.gitbook.io/documentation" }],
+      [{ text: "Website", url: "https://www.xei.ai/" }],
+      [{ text: "Whitepaper", url: "https://xei.gitbook.io/documentation" }],
+      [{ text: "Telegram Group", url: "https://t.me/xei_ai" }],
+      [{ text: "Medium", url: "https://xei.medium.com/" }],
+      [
+        {
+          text: "$XEI Coin",
+          url: "https://xei.gitbook.io/documentation/general-info/xei-coin",
+        },
+      ],
+      [
+        {
+          text: "Staking dApp",
+          url: "https://xei.gitbook.io/documentation/utility/staking-dapp",
+        },
+      ],
+      [
+        {
+          text: "#AIaaS",
+          url: "https://xei.gitbook.io/documentation/utility/aiaas",
+        },
+      ],
+      [{ text: "Create Cluster", url: "https://xei.ai/create-cluster/" }],
+      [
+        {
+          text: "Marketing Plan",
+          url: "https://xei.gitbook.io/documentation/general-info/marketing-plan-for-xei-coin",
+        },
+      ],
+      [
+        {
+          text: "Roadmap 2024",
+          url: "https://xei.gitbook.io/documentation/company/roadmap-2024",
+        },
+      ],
+      [
+        {
+          text: "Partnerships",
+          url: "https://xei.gitbook.io/documentation/company/partnerships",
+        },
+      ],
+      [{ text: "About Us", url: "https://xei.ai/about-us/" }],
+      [{ text: "Collaboration & Press", url: "press@xei.ai" }],
+      [{ text: "Support", url: "support@xei.ai" }],
       [{ text: "Back", callback_data: "BackMenu" }],
     ]).reply_markup
   );
 });
+
 const changeMode = async (ctx, index) => {
   currentIndex = index;
   let profiles = config.profiles.slice(currentIndex, currentIndex + 5);
@@ -267,7 +418,7 @@ bot.action("Help", async (ctx) => {
 
   Commands:
   ⚪ /menu – Menu
-  ⚪ /new – Start new interation\\(required\\) 
+  ⚪ /new – Start new interaction\\(*required\\) 
   ⚪ /settings – Show settings
   
   🧠 GPT\\-4 Turbo is available 
@@ -625,16 +776,16 @@ bot.action(/next-\d+/, async (ctx) => {
 });
 bot.action("BackMenu", async (ctx) => {
   await ctx.editMessageText(
-    `🫂 Subscribe to our channel to get latest bot updates
-
-        🏠 Menu:`
+    `
+    Subscribe to our Synthi AI Official Channel
+    
+    https://t.me/synthi_ai`
   );
   await ctx.editMessageReplyMarkup(
     Markup.inlineKeyboard([
       [{ text: "Select Chat Mode", callback_data: "SelectChat" }],
+      [{ text: "Coming Soon", callback_data: "comming_soon" }],
       [{ text: "Dialog History", callback_data: "Dialog-0" }],
-      // [{ text: "Get Free Tokens", callback_data: "FreeTokens" }],
-      // [{ text: "Gift Tokens", callback_data: "GiftToken" }],
       [{ text: "Balance", callback_data: "Balance" }],
       [
         { text: "Settings", callback_data: "settings" },
@@ -940,7 +1091,6 @@ bot.on("text", async (ctx) => {
         token: parseInt(newValue) < 0 ? 0 : newValue,
       },
     });
-    // }
   } catch (e) {
     console.log("error happened for ", data);
     console.log(e);
