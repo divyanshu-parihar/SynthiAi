@@ -56,8 +56,14 @@ async function exportDialogs(ctx) {
     // doc.save(
     //   path.join(__dirname, ctx.from.id.toString(), "interaction log" + ".pdf")
     // );
+    const directoryPath = path.join(__dirname, ctx.from.id.toString());
+
+    // Create the directory if it doesn't exist
+    if (!fs.existsSync(directoryPath)) {
+      fs.mkdirSync(directoryPath, { recursive: true });
+    }
     let writeStream = fs.createWriteStream(
-      path.join(__dirname, ctx.from.id.toString(), "interaction log" + ".xls")
+      path.join(directoryPath, "interaction log" + ".xls")
     );
     let header = "Prompt" + "\t" + "Response" + "\n";
     // let row1 = " 21" + "\t" + "Rob" + "\n";
