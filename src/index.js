@@ -188,8 +188,8 @@ bot.action("portal", async (ctx) => {
         },
       ],
       [{ text: "About Us", url: "https://xei.ai/about-us/" }],
-      [{ text: "Collaboration & Press", url: "press@xei.ai" }],
-      [{ text: "Support", url: "support@xei.ai" }],
+      [{ text: "Collaboration & Press", url: "https://press@xei.ai" }],
+      [{ text: "Support", url: "https://support@xei.ai" }],
       [{ text: "Back", callback_data: "BackMenu" }],
     ]).reply_markup
   );
