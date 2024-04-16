@@ -810,6 +810,7 @@ bot.on("text", async (ctx) => {
     el.name
   }. here is the description for your mode and reply as per your descripton without mentioned that your are an ai:
   description : ${el.desc},
+  maximum word limit(do not exceed this limit ever) : 400 words,
   prompt : ${bot.context.chats[ctx.from.id.toString()].join()}`;
   console.log(prompt);
 
@@ -936,7 +937,7 @@ bot.on("text", async (ctx) => {
     await prisma.userPurchasedToken.update({
       where: { userid: user },
       data: {
-        token: parseInt(newValue),
+        token: parseInt(newValue) < 0 ? 0 : newValue,
       },
     });
     // }
