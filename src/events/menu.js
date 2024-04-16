@@ -1,8 +1,7 @@
 async function menu(ctx) {
   await ctx.reply(
-    `🫂 Subscribe to our channel to get latest bot updates: 
-    
-        🏠 Menu:`,
+    `Subscribe to our Synthi AI Official Channel
+      https://t.me/synthi_ai`,
     {
       reply_markup: {
         inline_keyboard: [
