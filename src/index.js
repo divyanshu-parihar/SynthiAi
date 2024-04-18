@@ -1003,7 +1003,7 @@ bot.on("text", async (ctx) => {
     el.name
   }. here is the description for your mode and reply as per your descripton without mentioned that your are an ai:
   description : ${el.desc},
-  maximum word limit(do not exceed this limit ever) : 400 words,
+  maximum word limit(do not exceed this limit ever) : 10-400 words,
   prompt : ${bot.context.chats[ctx.from.id.toString()].join()}`;
   console.log(prompt);
 
