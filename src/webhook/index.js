@@ -83,7 +83,7 @@ app.post("/create", async (req, res) => {
         amount: parseFloat(1),
         currency: "USD",
       },
-      redirect_url: "https://giraffe-legible-centrally.ngrok-free.app/webhook",
+      redirect_url: "https://t.me/SynthiAI_bot",
     },
     { headers }
   );
