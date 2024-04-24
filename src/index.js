@@ -34,7 +34,7 @@ bot.context.chats = {};
 
 bot.use(session({ store }));
 bot.action("comming_soon", async (ctx) => {
-  await ctx.editMessageText(" comming soon: ");
+  await ctx.editMessageText(" coming soon: ");
 
   await ctx.editMessageReplyMarkup(
     Markup.inlineKeyboard([
