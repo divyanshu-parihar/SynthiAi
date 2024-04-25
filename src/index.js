@@ -901,6 +901,9 @@ bot.on("text", async (ctx) => {
     );
   }
 
+  if (dataPoint.token <= 0) {
+    return await ctx.reply("You don't have sufficient tokens.");
+  }
   // let chance = GibberishDetector.detect(ctx.message.text);
   // console.log(chance);
   // if (chance > 80) {
@@ -981,11 +984,6 @@ bot.on("text", async (ctx) => {
   // might slow it down in long term. consider making 2 configs. one for name and other description
   const desc = config.profiles.find((el) => el.name == data.chatMode);
 
-  // if (data.chatMode == "") {
-  //   await ctx.reply("Please select a chatMode. /menu");
-  //   return;
-  // }
-  // console.log(desc);
   const el = { name: data["chatMode"], desc: desc.desc };
   console.log(el);
   try {
