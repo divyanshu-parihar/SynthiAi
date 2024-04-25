@@ -80,7 +80,7 @@ app.post("/create", async (req, res) => {
       pricing_type: "fixed_price",
       local_price: {
         // amount: parseFloat(data.amount),
-        amount: parseFloat(1),
+        amount: parseFloat(5),
         currency: "USD",
       },
       redirect_url: "https://t.me/SynthiAI_bot",
