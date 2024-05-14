@@ -1,3 +1,53 @@
+divyanshu.parihar@Divyanshus-MacBook-Air synth ai bot % vim
+divyanshu.parihar@Divyanshus-MacBook-Air synth ai bot % ls
+Archive.zip			src
+TODO.txt			telegraf-sessions.sqlite
+node_modules			webhook_request.bat
+package-lock.json		webhook_request.sh
+package.json			yarn-error.log
+prisma				yarn.lock
+divyanshu.parihar@Divyanshus-MacBook-Air synth ai bot % clear
+
+
+
+
+
+
+
+
+            ██╗      █████╗ ███████╗██╗   ██╗██╗   ██╗██╗███╗   ███╗          Z
+            ██║     ██╔══██╗╚══███╔╝╚██╗ ██╔╝██║   ██║██║████╗ ████║      Z
+            ██║     ███████║  ███╔╝  ╚████╔╝ ██║   ██║██║██╔████╔██║   z
+            ██║     ██╔══██║ ███╔╝    ╚██╔╝  ╚██╗ ██╔╝██║██║╚██╔╝██║ z
+            ███████╗██║  ██║███████╗   ██║    ╚████╔╝ ██║██║ ╚═╝ ██║
+            ╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝     ╚═══╝  ╚═╝╚═╝     ╚═╝
+
+
+
+               �  Find file                                     f
+
+                 New file                                      n
+
+                 Recent files                                  r
+
+                 Find text                                     g
+                                                              18,21-19      Top
+divyanshu.parihar@Divyanshus-MacBook-Air synth ai bot % nvim
+divyanshu.parihar@Divyanshus-MacBook-Air synth ai bot % git statuys
+git: 'statuys' is not a git command. See 'git --help'.
+
+The most similar command is
+	status
+divyanshu.parihar@Divyanshus-MacBook-Air synth ai bot % git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   src/index.js
+
+no changes added to commit (use "git add" and/or "git commit -a")
 const express = require("express");
 const app = express();
 const axios = require("axios");
@@ -20,91 +70,4 @@ app.post("/webhook", async (req, res) => {
     const amount = parseInt(payload.pricing.local.amount);
     // const currency = payload.pricing.local.currency;
     // const customerName = payload.metadata.name;
-    // const customerEmail = payload.metadata.email;
 
-    if (status == "COMPLETED") {
-      const data = await prisma.userOrders.findFirst({
-        where: {
-          orderid: req.body.event.data.id,
-        },
-      });
-      // url: 'https://commerce.coinbase.com/pay/3592c237-e72b-4e71-8de2-569dcf0b515f'
-      const user = data.userid;
-
-      const dataPoint = await prisma.userPurchasedToken.findUnique({
-        where: { userid: user },
-      });
-      console.log(data, user, dataPoint);
-      if (!dataPoint) {
-        throw new Error("Data point not found");
-      }
-
-      // Calculate the new value
-      const currentValue = dataPoint.token;
-      const newValue = currentValue + amount * 100;
-
-      // Update the database with the new value
-      console.log(newValue);
-      await prisma.userPurchasedToken.update({
-        where: { userid: user },
-        data: {
-          token: parseInt(newValue),
-        },
-      });
-
-      return res.send(JSON.stringify(data));
-    }
-  } catch (e) {
-    // console.log("error happened for ", user, currentValue, newValue);
-    console.log(e);
-    return res.send(JSON.stringify(e));
-  }
-});
-
-app.post("/create", async (req, res) => {
-  const data = req.body;
-  console.log(data);
-  const apiKey = "501fd8be-d3b5-4dbe-910d-8096cd061c7f";
-  if (!data || !data.userid || !data.amount) return res.status(400);
-
-  const headers = {
-    "Content-Type": "application/json",
-    "X-CC-Api-Key": apiKey,
-  };
-
-  const result = await axios.post(
-    "https://api.commerce.coinbase.com/charges/",
-    {
-      name: data.userid + "-" + data.amount,
-      description: "token payment",
-      pricing_type: "fixed_price",
-      local_price: {
-        // amount: parseFloat(data.amount),
-        amount: parseFloat(5),
-        currency: "USD",
-      },
-      redirect_url: "https://t.me/SynthiAI_bot",
-    },
-    { headers }
-  );
-
-  if (result.status == 201) {
-    try {
-      await prisma.userOrders.create({
-        data: {
-          userid: data.userid,
-          orderid: result.data.data.id,
-        },
-      });
-    } catch (e) {
-      console.log(e);
-      res.status(500);
-    }
-    return res.send({ url: result.data.data.hosted_url });
-  } else res.status(400);
-});
-app.listen(3000, (req, res) => {
-  console.log("webhook started");
-});
-
-// console.log("Hello");
