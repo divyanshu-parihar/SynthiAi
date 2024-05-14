@@ -326,7 +326,7 @@ bot.on("voice", async (ctx) => {
             undefined,
             response
           );
-        } catch (e) {}
+        } catch (e) { }
       }
     }
     try {
@@ -763,7 +763,7 @@ bot.action(/back-\d+/, async (ctx) => {
         [{ text: "Back to menu", callback_data: "BackMenu" }],
       ]).reply_markup
     );
-  } catch (e) {}
+  } catch (e) { }
 });
 
 bot.action("Balance", async (ctx) => {
@@ -814,7 +814,7 @@ bot.action(/next-\d+/, async (ctx) => {
         [{ text: "Back to menu", callback_data: "BackMenu" }],
       ]).reply_markup
     );
-  } catch (e) {}
+  } catch (e) { }
 });
 bot.action("BackMenu", async (ctx) => {
   await ctx.editMessageText(
@@ -997,9 +997,8 @@ bot.on("text", async (ctx) => {
       `You : ${ctx.message.text}\n`
     );
   }
-  const prompt = `I want you to act like you are in  ${
-    el.name
-  }. here is the description for your mode and reply as per your descripton without mentioned that your are an ai:
+  const prompt = `I want you to act like you are in  ${el.name
+    }. here is the description for your mode and reply as per your descripton without mentioned that your are an ai:
   description : ${el.desc},
   maximum word limit(do not exceed this limit ever) : 10-400 words,
   prompt : ${bot.context.chats[ctx.from.id.toString()].join()}`;
@@ -1008,7 +1007,7 @@ bot.on("text", async (ctx) => {
   let message = await ctx.reply("...");
   // console.log(settings.gpt);
   let response = await openai.chat.completions.create({
-    model: "gpt-4-turbo-preview",
+    model: "gpt-4o",
     messages: [{ role: "user", content: prompt }],
     // stream: true,
   });
