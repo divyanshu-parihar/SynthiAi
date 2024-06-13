@@ -40,97 +40,79 @@ bot.action("comming_soon", async (ctx) => {
     Markup.inlineKeyboard([
       [
         {
-          text: "RAG Support for Document Queries",
+          text: "RAQ support (ON)",
           callback_data: "soon",
         },
       ],
       [
         {
-          text: "Expanded Options for Text Models Including Llama, GPT-3, GPT-4, and Mistral",
+          text: "GPT-4o (ON)",
           callback_data: "soon",
         },
       ],
       [
         {
-          text: "System Status Monitoring for CPU and GPU Usage",
+          text: "GPU/CPU Usage (ON)",
           callback_data: "soon",
         },
       ],
       [
         {
-          text: "Enhanced Image Model Options: Stable Diffusion, Playground AI, DALLE",
+          text: "Dalle Images (ON)",
           callback_data: "soon",
         },
       ],
       [
         {
-          text: "Text-to-Voice Capabilities Using Hume AI (Beta)",
+          text: "Text-to-Voice (in development)",
           callback_data: "soon",
         },
       ],
       [
         {
-          text: "Fast and Accurate Speech-to-Text with Whisper Model",
+          text: "Whisper Model (ON)",
           callback_data: "soon",
         },
       ],
       [
         {
-          text: "Multilingual Support with Google Translate API",
+          text: "Multilingual Support (ON)",
           callback_data: "soon",
         },
       ],
       [
         {
-          text: "Integration of Image Recognition Features",
+          text: "Image + Voice to Video (Visonique)",
           callback_data: "soon",
         },
       ],
       [
         {
-          text: "Text-to-Video Generation Capabilities",
+          text: "Personalization (ON)",
           callback_data: "soon",
         },
       ],
       [
         {
-          text: "Multi-platform Integration with Messaging Platforms",
+          text: "Natural Query Interpretation (ON)",
           callback_data: "soon",
         },
       ],
       [
         {
-          text: "Personalization Based on User Preferences and History",
+          text: "Adaptive Learning (ON)",
           callback_data: "soon",
         },
       ],
       [
         {
-          text: "Advanced Natural Language Understanding for Better Query Interpretation",
+          text: "Proactive Assistant (ON)",
           callback_data: "soon",
         },
       ],
       [
         {
-          text: "Emotional Intelligence Through Sentiment Analysis",
-          callback_data: "soon",
-        },
-      ],
-      [
-        {
-          text: "Adaptive Learning from User Interactions and Feedback",
-          callback_data: "soon",
-        },
-      ],
-      [
-        {
-          text: "Proactive Assistance by Anticipating User Needs",
-          callback_data: "soon",
-        },
-      ],
-      [
-        {
-          text: "Text-to-Website Generation (beta)",
+          text: "Text-to-Website (beta)",
           callback_data: "soon",
         },
       ],
@@ -139,7 +121,7 @@ bot.action("comming_soon", async (ctx) => {
   );
 });
 bot.action("soon", async (ctx) => {
-  await ctx.reply("currently in the development");
+  await ctx.reply("This feature has been turned off.");
 });
 bot.action("portal", async (ctx) => {
   await ctx.editMessageText("XEI Portal: ");
@@ -326,7 +308,7 @@ bot.on("voice", async (ctx) => {
             undefined,
             response
           );
-        } catch (e) { }
+        } catch (e) {}
       }
     }
     try {
@@ -763,7 +745,7 @@ bot.action(/back-\d+/, async (ctx) => {
         [{ text: "Back to menu", callback_data: "BackMenu" }],
       ]).reply_markup
     );
-  } catch (e) { }
+  } catch (e) {}
 });
 
 bot.action("Balance", async (ctx) => {
@@ -814,7 +796,7 @@ bot.action(/next-\d+/, async (ctx) => {
         [{ text: "Back to menu", callback_data: "BackMenu" }],
       ]).reply_markup
     );
-  } catch (e) { }
+  } catch (e) {}
 });
 bot.action("BackMenu", async (ctx) => {
   await ctx.editMessageText(
@@ -997,8 +979,9 @@ bot.on("text", async (ctx) => {
       `You : ${ctx.message.text}\n`
     );
   }
-  const prompt = `I want you to act like you are in  ${el.name
-    }. here is the description for your mode and reply as per your descripton without mentioned that your are an ai:
+  const prompt = `I want you to act like you are in  ${
+    el.name
+  }. here is the description for your mode and reply as per your descripton without mentioned that your are an ai:
   description : ${el.desc},
   maximum word limit(do not exceed this limit ever) : 10-400 words,
   prompt : ${bot.context.chats[ctx.from.id.toString()].join()}`;
