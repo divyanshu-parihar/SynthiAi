@@ -117,7 +117,7 @@ bot.action("comming_soon", async (ctx) => {
         },
       ],
       [{ text: "Back", callback_data: "BackMenu" }],
-    ]).reply_markup
+    ]).reply_markup,
   );
 });
 bot.action("soon", async (ctx) => {
@@ -171,7 +171,7 @@ bot.action("portal", async (ctx) => {
       ],
       [{ text: "About Us", url: "https://xei.ai/about-us/" }],
       [{ text: "Back", callback_data: "BackMenu" }],
-    ]).reply_markup
+    ]).reply_markup,
   );
 });
 
@@ -211,7 +211,7 @@ const changeMode = async (ctx, index) => {
           ...keyboard,
         ],
       },
-    }
+    },
   );
 };
 
@@ -306,7 +306,7 @@ bot.on("voice", async (ctx) => {
             message.chat.id,
             message.message_id,
             undefined,
-            response
+            response,
           );
         } catch (e) {}
       }
@@ -344,8 +344,8 @@ bot.on("voice", async (ctx) => {
 });
 bot.start(async (ctx) => {
   await ctx.reply(`Hello!
-  I am the most advanced Artificial Intelligence in the world (created by OpenAI).
-  
+  I am the most advanced Artificial Intelligence in the world (created by XEIAI).
+
   I can help you with many tasks. For example:
   – write a social media post, an essay, an email
   – recognize your 🎤 Voice Messages
@@ -398,21 +398,21 @@ bot.action("Help", async (ctx) => {
 
   Commands:
   ⚪ /menu – Menu
-  ⚪ /new – Start new interaction\\(\\*required\\) 
+  ⚪ /new – Start new interaction\\(\\*required\\)
   ⚪ /settings – Show settings
-  
-  🧠 GPT\\-4 Turbo is available 
+
+  🧠 GPT\\-4 Turbo is available
   🎨 Image Generation mode is live
   🎤 Voice Messages can be used
-  
+
   Key Points to Remember:
   \\- Your conversation's length directly influences token consumption; shorter dialogs save tokens
   \\- Restart the conversation using the /new command
   \\- Utilize English \\(🇬🇧\\) for enhanced response quality
-  
+
   The GPT\\-4 Turbo mode uses ten times the tokens compared to ChatGPT\\.
   👩🏼‍💻 Support: @marcus\\_xei \\- Lead Synthi Architect
-  📜 [More details in our page](https://xei.gitbook.io/documentation/utility/synthi-ai-assistant) \\. 
+  📜 [More details in our page](https://xei.gitbook.io/documentation/utility/synthi-ai-assistant) \\.
   `);
 });
 bot.hears("/help", async (ctx) => {
@@ -420,21 +420,21 @@ bot.hears("/help", async (ctx) => {
 
   Commands:
   ⚪ /menu – Menu
-  ⚪ /new – Start new interation\\(\\*required\\) 
+  ⚪ /new – Start new interation\\(\\*required\\)
   ⚪ /settings – Show settings
-  
-  🧠 GPT\\-4 Turbo is available 
+
+  🧠 GPT\\-4 Turbo is available
   🎨 Image Generation mode is live
   🎤 Voice Messages can be used
-  
+
   Key Points to Remember:
   \\- Your conversation's length directly influences token consumption; shorter dialogs save tokens
   \\- Restart the conversation using the /new command
   \\- Utilize English \\(🇬🇧\\) for enhanced response quality
-  
+
   The GPT\\-4 Turbo mode uses ten times the tokens compared to ChatGPT\\.
   👩🏼‍💻 Support: @marcus\\_xei \\- Lead Synthi Architect
-  📜 [More details in our page](https://xei.gitbook.io/documentation/utility/synthi-ai-assistant) \\. 
+  📜 [More details in our page](https://xei.gitbook.io/documentation/utility/synthi-ai-assistant) \\.
   `);
 });
 bot.hears("/help", async (ctx) => {
@@ -442,21 +442,21 @@ bot.hears("/help", async (ctx) => {
 
   Commands:
   ⚪ /menu – Menu
-  ⚪ /new – Start new interation\\(required\\) 
+  ⚪ /new – Start new interation\\(required\\)
   ⚪ /settings – Show settings
-  
-  🧠 GPT\\-4 Turbo is available 
+
+  🧠 GPT\\-4 Turbo is available
   🎨 Image Generation mode is live
   🎤 Voice Messages can be used
-  
+
   Key Points to Remember:
   \\- Your conversation's length directly influences token consumption; shorter dialogs save tokens
   \\- Restart the conversation using the /new command
   \\- Utilize English \\(🇬🇧\\) for enhanced response quality
-  
+
   The GPT\\-4 Turbo mode uses ten times the tokens compared to ChatGPT\\.
   👩🏼‍💻 Support: @marcus\\_xei \\- Lead Synthi Architect
-  📜 [More details in our page](https://xei.gitbook.io/documentation/utility/synthi-ai-assistant) \\. 
+  📜 [More details in our page](https://xei.gitbook.io/documentation/utility/synthi-ai-assistant) \\.
   `);
 });
 bot.hears("/help", async (ctx) => {
@@ -464,21 +464,21 @@ bot.hears("/help", async (ctx) => {
 
   Commands:
   ⚪ /menu – Menu
-  ⚪ /new – Start new interation\\(required\\) 
+  ⚪ /new – Start new interation\\(required\\)
   ⚪ /settings – Show settings
-  
-  🧠 GPT\\-4 Turbo is available 
+
+  🧠 GPT\\-4 Turbo is available
   🎨 Image Generation mode is live
   🎤 Voice Messages can be used
-  
+
   Key Points to Remember:
   \\- Your conversation's length directly influences token consumption; shorter dialogs save tokens
   \\- Restart the conversation using the /new command
   \\- Utilize English \\(🇬🇧\\) for enhanced response quality
-  
+
   The GPT\\-4 Turbo mode uses ten times the tokens compared to ChatGPT\\.
   👩🏼‍💻 Support: @marcus\\_xei \\- Lead Synthi Architect
-  📜 [More details in our page](https://xei.gitbook.io/documentation/utility/synthi-ai-assistant) \\. 
+  📜 [More details in our page](https://xei.gitbook.io/documentation/utility/synthi-ai-assistant) \\.
   `);
 });
 bot.hears("/menu", menu);
@@ -533,19 +533,19 @@ bot.action("AIMODEL", async (ctx) => {
     ChatGPT is that well-known model. It's fast and cheap. Ideal for everyday tasks. If there are some tasks it can't handle, try the GPT-4
 
     💡 Note: ChatGPT consumes 25x less tokens than GPT-4. Prefer using it for daily tasks.
-    
+
     🟢🟢🟢⚪️⚪️ – Smart
-    
+
     🟢🟢🟢🟢🟢 – Fast
-    
+
     🟢🟢🟢🟢🟢 – Cheap
-    
+
     Select model:`);
     await ctx.editMessageReplyMarkup(
       Markup.inlineKeyboard([
         [{ text: "GPT4", callback_data: "changeGPT|gpt-4-turbo-preview" }],
         [{ text: "Back", callback_data: "BackMenu" }],
-      ]).reply_markup
+      ]).reply_markup,
     );
   } catch (e) {
     console.log(e);
@@ -627,7 +627,7 @@ bot.action("settings", async (ctx) => {
         [{ text: "AI Model", callback_data: "AIMODEL" }],
         [{ text: "Purchase", callback_data: "purchase" }],
         [{ text: "Back to menu", callback_data: "BackMenu" }],
-      ]).reply_markup
+      ]).reply_markup,
     );
   } catch (e) {
     console.log(e);
@@ -641,7 +641,7 @@ bot.action("purchase", async (ctx) => {
       userid: ctx.from.id.toString(),
       amount: 50,
     },
-    { "Content-Type": "application/json", "User-Agent": "insomnia/8.6.1" }
+    { "Content-Type": "application/json", "User-Agent": "insomnia/8.6.1" },
   );
   console.log(data);
   await ctx.reply(data.data.url);
@@ -668,13 +668,13 @@ bot.action(/Dialog-\d+/, dialog);
 bot.action(/ExportDialogs-\d+/, exportDialogs);
 bot.action("DeleteAllDialogs", async (ctx) => {
   await ctx.editMessageText(
-    `You sure want to delete the Dialogs(Irreversible)? `
+    `You sure want to delete the Dialogs(Irreversible)? `,
   );
   await ctx.editMessageReplyMarkup(
     Markup.inlineKeyboard([
       [{ text: "Yes", callback_data: "ConfirmDeleteAllDialogs" }],
       [{ text: "Back to menu", callback_data: "BackMenu" }],
-    ]).reply_markup
+    ]).reply_markup,
   );
 });
 bot.action("ConfirmDeleteAllDialogs", async (ctx) => {
@@ -743,7 +743,7 @@ bot.action(/back-\d+/, async (ctx) => {
           { text: "Next", callback_data: "next-" + parseInt(newLoc) },
         ],
         [{ text: "Back to menu", callback_data: "BackMenu" }],
-      ]).reply_markup
+      ]).reply_markup,
     );
   } catch (e) {}
 });
@@ -794,7 +794,7 @@ bot.action(/next-\d+/, async (ctx) => {
           { text: "Back", callback_data: "back-" + parseInt(data - 5) },
         ],
         [{ text: "Back to menu", callback_data: "BackMenu" }],
-      ]).reply_markup
+      ]).reply_markup,
     );
   } catch (e) {}
 });
@@ -802,8 +802,8 @@ bot.action("BackMenu", async (ctx) => {
   await ctx.editMessageText(
     `
     Subscribe to our Synthi AI Official Channel
-    
-    https://t.me/synthi_ai`
+
+    https://t.me/synthi_ai`,
   );
   await ctx.editMessageReplyMarkup(
     Markup.inlineKeyboard([
@@ -821,7 +821,7 @@ bot.action("BackMenu", async (ctx) => {
           callback_data: "portal",
         },
       ],
-    ]).reply_markup
+    ]).reply_markup,
   );
 });
 
@@ -879,7 +879,7 @@ bot.on("text", async (ctx) => {
   if (!dataPoint) {
     // throw new Error("Data point not found");
     return await ctx.reply(
-      "You don't have a token wallet, Please create one with /start."
+      "You don't have a token wallet, Please create one with /start.",
     );
   }
 
@@ -901,7 +901,7 @@ bot.on("text", async (ctx) => {
   });
   if (!currentInteractionData) {
     return await ctx.reply(
-      "Please resend the message after creating a interaction with /new."
+      "Please resend the message after creating a interaction with /new.",
     );
   }
   const data = await prisma.currentAssitant.findFirst({
@@ -970,13 +970,13 @@ bot.on("text", async (ctx) => {
   console.log(el);
   try {
     bot.context.chats[ctx.from.id.toString()].push(
-      `You : ${ctx.message.text}\n`
+      `You : ${ctx.message.text}\n`,
     );
   } catch (e) {
     console.log(e);
     bot.context.chats[ctx.from.id.toString()] = [];
     bot.context.chats[ctx.from.id.toString()].push(
-      `You : ${ctx.message.text}\n`
+      `You : ${ctx.message.text}\n`,
     );
   }
   const prompt = `I want you to act like you are in  ${
@@ -1047,7 +1047,7 @@ bot.on("text", async (ctx) => {
       message.chat.id,
       message.message_id,
       undefined,
-      response
+      response,
     );
   } else {
     const noOfedits = 7;
@@ -1066,19 +1066,19 @@ bot.on("text", async (ctx) => {
       message.chat.id,
       message.message_id,
       undefined,
-      segment1
+      segment1,
     );
     await bot.telegram.editMessageText(
       message.chat.id,
       message.message_id,
       undefined,
-      segment1 + segment2
+      segment1 + segment2,
     );
     await bot.telegram.editMessageText(
       message.chat.id,
       message.message_id,
       undefined,
-      segment1 + segment2 + segment3
+      segment1 + segment2 + segment3,
     );
   }
 
