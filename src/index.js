@@ -8,6 +8,7 @@ const GibberishDetector = require("gibberish-detector");
 
 const { SQLite } = require("@telegraf/session/sqlite");
 
+
 const {
   start,
   menu,
