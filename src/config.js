@@ -4,6 +4,7 @@ module.exports = {
     {
       name: " 👨‍💼 Assistant",
       desc: "You are now working as a regular GPT3. NO SPECIAL MODES. Your are now normal chatbot",
+      
     },
     {
       name: " 👩‍🚀 GPT4(PRO)",
